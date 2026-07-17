@@ -1,13 +1,13 @@
 <?php
+
 namespace Ict\LoyaltyTier\Model\ResourceModel\Exam;
 
-class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
+use Ict\LoyaltyTier\Model\Exam;
+use Ict\LoyaltyTier\Model\ResourceModel\Exam as ExamResource;
+use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
+
+class Collection extends AbstractCollection
 {
-    /**
-     * @var string
-     */
-    protected $_idFieldName = 'entity_id';
-    
     /**
      * Dependency Initilization
      *
@@ -15,10 +15,10 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
      */
     public function _construct()
     {
+        $this->_setIdFieldName('entity_id');
         $this->_init(
-            \Ict\LoyaltyTier\Model\Exam::class,
-            \Ict\LoyaltyTier\Model\ResourceModel\Exam::class
+            Exam::class,
+            ExamResource::class
         );
-        // $this->_map['fields']['entity_id'] = 'main_table.entity_id';
     }
 }

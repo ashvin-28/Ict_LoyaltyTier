@@ -1,5 +1,0 @@
-<?php
-
-/**
- * Legacy backup placeholder.
- */

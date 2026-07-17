@@ -1,23 +1,34 @@
 <?php
+
 namespace Ict\LoyaltyTier\Observer;
 
+use Ict\LoyaltyTier\Model\LoyaltyManager;
+use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 
 class ShipmentSaveAfter implements ObserverInterface
 {
     /**
-     * @var \Ict\LoyaltyTier\Model\LoyaltyManager
+     * @var LoyaltyManager
      */
     private $loyaltyManager;
 
+    /**
+     * @param LoyaltyManager $loyaltyManager
+     */
     public function __construct(
-        \Ict\LoyaltyTier\Model\LoyaltyManager $loyaltyManager
+        LoyaltyManager $loyaltyManager
     ) {
         $this->loyaltyManager = $loyaltyManager;
     }
-    
 
-    public function execute(\Magento\Framework\Event\Observer $observer)
+    /**
+     * Sync loyalty tier after shipment save.
+     *
+     * @param Observer $observer
+     * @return void
+     */
+    public function execute(Observer $observer)
     {
         $shipment = $observer->getEvent()->getShipment();
         $order = $shipment->getOrder();

@@ -1,11 +1,13 @@
 <?php
+// phpcs:disable Squiz.ControlStructures.ControlSignature
 $tires = $block->getTireData();
 $spend = $block->getCustomerLifetimeSpend();
 
 $nextTier = $block->getNextTier();
 $next = ($nextTier && $nextTier->getId()) ? (float) $nextTier->getMinimumSpend() : null;
+$hasTires = $tires && $tires->getSize();
 ?>
-<?php if ($tires && count($tires)): ?>
+<?php if ($hasTires): ?>
     <div class="block block-dashboard-loyalty">
         <div class="block-title">
             <strong><?= $escaper->escapeHtml(__('Loyalty Tier Details')) ?></strong>
@@ -32,10 +34,18 @@ $next = ($nextTier && $nextTier->getId()) ? (float) $nextTier->getMinimumSpend()
                                 <td><?= $escaper->escapeHtml($tire->getName()) ?></td>
                                 <td><?= $escaper->escapeHtml($block->formatCurrency($spend)) ?></td>
                                 <td><?= $escaper->escapeHtml($block->formatCurrency($tire->getMinimumSpend())) ?></td>
-                                <td><?= $reach !== null ? $escaper->escapeHtml($block->formatCurrency($reach)) : $escaper->escapeHtml(__('Highest Tier')) ?></td>
+                                <td>
+                                    <?= $reach !== null
+                                        ? $escaper->escapeHtml($block->formatCurrency($reach))
+                                        : $escaper->escapeHtml(__('Highest Tier')) ?>
+                                </td>
                                 <td><?= $escaper->escapeHtml($block->formatPercent($tire->getDiscount())) ?></td>
                                 <td><?= $escaper->escapeHtml($block->getRemainingUsageLimit($tire)) ?></td>
-                                <td><?= ($nextTier && $nextTier->getId()) ? $escaper->escapeHtml($block->formatPercent($nextTier->getDiscount())) : $escaper->escapeHtml(__('N/A')) ?></td>
+                                <td>
+                                    <?= ($nextTier && $nextTier->getId())
+                                        ? $escaper->escapeHtml($block->formatPercent($nextTier->getDiscount()))
+                                        : $escaper->escapeHtml(__('N/A')) ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -44,5 +54,6 @@ $next = ($nextTier && $nextTier->getId()) ? (float) $nextTier->getMinimumSpend()
         </div>
     </div>
 <?php else: ?>
-    <div class="message info"><span><?= __('No tire data found.') ?></span></div>
+    <div class="message info"><span><?= $escaper->escapeHtml(__('No tire data found.')) ?></span></div>
 <?php endif; ?>
+<?php // phpcs:enable Squiz.ControlStructures.ControlSignature ?>

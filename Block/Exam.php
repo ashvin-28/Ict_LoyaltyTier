@@ -9,25 +9,51 @@ use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Ict\LoyaltyTier\Model\ResourceModel\Exam\CollectionFactory as ExamCollectionFactory;
 use Ict\LoyaltyTier\Model\LoyaltyManager;
-// use Ict\LoyaltyTier\Model\Model\ExamFactory as LoyaltyCollectionFactory;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 
 class Exam extends Template
 {
-    protected $customerSession;
-    protected $examCollectionFactory;
-    protected $orderCollectionFactory;
-    protected $loyaltyManager;
-    protected $priceCurrency;
-    // protected $loyaltyCollectionFactory;
+    /**
+     * @var CustomerSession
+     */
+    private $customerSession;
 
+    /**
+     * @var ExamCollectionFactory
+     */
+    private $examCollectionFactory;
+
+    /**
+     * @var OrderCollectionFactory
+     */
+    private $orderCollectionFactory;
+
+    /**
+     * @var LoyaltyManager
+     */
+    private $loyaltyManager;
+
+    /**
+     * @var PriceCurrencyInterface|null
+     */
+    private $priceCurrency;
+
+    /**
+     * @param Context $context
+     * @param CustomerSession $customerSession
+     * @param ExamCollectionFactory $examCollectionFactory
+     * @param OrderCollectionFactory $orderCollectionFactory
+     * @param LoyaltyManager $loyaltyManager
+     * @param array $data
+     * @param PriceCurrencyInterface|null $priceCurrency
+     */
     public function __construct(
         Context $context,
+        // phpcs:ignore MEQP2.Classes.MutableObjects.MutableObjects
         CustomerSession $customerSession,
         ExamCollectionFactory $examCollectionFactory,
         OrderCollectionFactory $orderCollectionFactory,
         LoyaltyManager $loyaltyManager,
-        // LoyaltyCollectionFactory $loyaltyCollectionFactory,
         array $data = [],
         ?PriceCurrencyInterface $priceCurrency = null
     ) {
@@ -35,33 +61,23 @@ class Exam extends Template
         $this->examCollectionFactory = $examCollectionFactory;
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->loyaltyManager = $loyaltyManager;
-        $this->priceCurrency = $priceCurrency ?: ObjectManager::getInstance()->get(PriceCurrencyInterface::class);
-        // $this->loyaltyCollectionFactory = $loyaltyCollectionFactory;
+        $this->priceCurrency = $priceCurrency;
         parent::__construct($context, $data);
     }
 
-    // public function getTireData()
-    // {
-    //     $customerId = $this->customerSession->getCustomerId();
-    //     if (!$customerId) {
-    //         return false;
-    //     }
-    //     return $this->examCollectionFactory->create()
-    //         ->addFieldToFilter('entity_id', 4);
-    // }
+    /**
+     * Get current customer tier data.
+     *
+     * @return \Ict\LoyaltyTier\Model\ResourceModel\Exam\Collection|false
+     */
     public function getTireData()
     {
         $spend = $this->getCustomerLifetimeSpend();
         $customerId = $this->customerSession->getCustomerId();
-        // echo $customerId;die;
 
         if (!$customerId) {
             return false;
         }
-
-
-        // $loyaltyCollection = $this->loyaltyCollectionFactory->create();
-
 
         $collection = $this->examCollectionFactory->create();
         $collection->addFieldToFilter('status', 1);
@@ -71,11 +87,17 @@ class Exam extends Template
 
         return $collection;
     }
+
+    /**
+     * Get next loyalty tier.
+     *
+     * @return \Ict\LoyaltyTier\Model\Exam|false
+     */
     public function getNextTier()
     {
         $spend = $this->getCustomerLifetimeSpend();
         $customerId = $this->customerSession->getCustomerId();
-        
+
         if (!$customerId || $spend === null) {
             return false;
         }
@@ -85,11 +107,18 @@ class Exam extends Template
         $collection->addFieldToFilter('minimum_spend', ['gt' => $spend]);
         $collection->setOrder('minimum_spend', 'ASC');
         $collection->setPageSize(1);
-        
-        return $collection->getFirstItem();
+        $collection->load();
+        $items = $collection->getItems();
+        $item = reset($items);
+
+        return $item ?: $collection->getNewEmptyItem();
     }
 
-
+    /**
+     * Get customer lifetime spend.
+     *
+     * @return float|int
+     */
     public function getCustomerLifetimeSpend()
     {
         if (!$this->customerSession->isLoggedIn()) {
@@ -99,6 +128,12 @@ class Exam extends Template
         return $this->loyaltyManager->getCustomerLifetimeSpend((int) $this->customerSession->getCustomerId());
     }
 
+    /**
+     * Get remaining usage limit for tier.
+     *
+     * @param \Ict\LoyaltyTier\Model\Exam $tier
+     * @return \Magento\Framework\Phrase|int
+     */
     public function getRemainingUsageLimit($tier)
     {
         $limit = (int) $tier->getData('limit');
@@ -116,17 +151,43 @@ class Exam extends Template
         return $remaining === null ? __('Unlimited') : $remaining;
     }
 
+    /**
+     * Format currency amount.
+     *
+     * @param float|int|string $value
+     * @return string
+     */
     public function formatCurrency($value): string
     {
-        return $this->priceCurrency->format(
+        return $this->getPriceCurrency()->format(
             (float) $value,
             false,
             PriceCurrencyInterface::DEFAULT_PRECISION
         );
     }
 
+    /**
+     * Format percent value.
+     *
+     * @param float|int|string $value
+     * @return string
+     */
     public function formatPercent($value): string
     {
         return rtrim(rtrim(number_format((float) $value, 2, '.', ''), '0'), '.') . '%';
+    }
+
+    /**
+     * Get price currency service.
+     *
+     * @return PriceCurrencyInterface
+     */
+    private function getPriceCurrency(): PriceCurrencyInterface
+    {
+        if (!$this->priceCurrency) {
+            $this->priceCurrency = ObjectManager::getInstance()->get(PriceCurrencyInterface::class);
+        }
+
+        return $this->priceCurrency;
     }
 }

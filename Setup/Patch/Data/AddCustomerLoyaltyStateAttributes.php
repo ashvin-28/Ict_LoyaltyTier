@@ -3,6 +3,7 @@
 namespace Ict\LoyaltyTier\Setup\Patch\Data;
 
 use Magento\Customer\Model\Customer;
+use Magento\Customer\Setup\CustomerSetup;
 use Magento\Customer\Setup\CustomerSetupFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
@@ -19,6 +20,10 @@ class AddCustomerLoyaltyStateAttributes implements DataPatchInterface
      */
     private $customerSetupFactory;
 
+    /**
+     * @param ModuleDataSetupInterface $moduleDataSetup
+     * @param CustomerSetupFactory $customerSetupFactory
+     */
     public function __construct(
         ModuleDataSetupInterface $moduleDataSetup,
         CustomerSetupFactory $customerSetupFactory
@@ -27,6 +32,11 @@ class AddCustomerLoyaltyStateAttributes implements DataPatchInterface
         $this->customerSetupFactory = $customerSetupFactory;
     }
 
+    /**
+     * Apply customer loyalty state attributes.
+     *
+     * @return void
+     */
     public function apply()
     {
         $this->moduleDataSetup->getConnection()->startSetup();
@@ -73,20 +83,38 @@ class AddCustomerLoyaltyStateAttributes implements DataPatchInterface
         $this->moduleDataSetup->getConnection()->endSetup();
     }
 
+    /**
+     * Get patch dependencies.
+     *
+     * @return array
+     */
     public static function getDependencies()
     {
         return [AddCustomerAttributes::class];
     }
 
+    /**
+     * Get patch aliases.
+     *
+     * @return array
+     */
     public function getAliases()
     {
         return [
-            'Ict\Exam\Setup\Patch\Data\AddCustomerLoyaltyStateAttributes',
+            \Ict\Exam\Setup\Patch\Data\AddCustomerLoyaltyStateAttributes::class,
         ];
     }
 
+    /**
+     * Add attribute when missing.
+     *
+     * @param CustomerSetup $customerSetup
+     * @param string $attributeCode
+     * @param array $attributeData
+     * @return void
+     */
     private function addAttributeIfMissing(
-        \Magento\Customer\Setup\CustomerSetup $customerSetup,
+        CustomerSetup $customerSetup,
         string $attributeCode,
         array $attributeData
     ): void {
@@ -98,8 +126,16 @@ class AddCustomerLoyaltyStateAttributes implements DataPatchInterface
         $customerSetup->addAttribute(Customer::ENTITY, $attributeCode, $attributeData);
     }
 
+    /**
+     * Assign customer attribute forms.
+     *
+     * @param CustomerSetup $customerSetup
+     * @param string $attributeCode
+     * @param array $forms
+     * @return void
+     */
     private function assignForms(
-        \Magento\Customer\Setup\CustomerSetup $customerSetup,
+        CustomerSetup $customerSetup,
         string $attributeCode,
         array $forms
     ): void {

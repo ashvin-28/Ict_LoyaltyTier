@@ -20,6 +20,10 @@ class SyncCustomerLoyaltyAfterOrderChange implements ObserverInterface
      */
     private $logger;
 
+    /**
+     * @param LoyaltyManager $loyaltyManager
+     * @param LoggerInterface $logger
+     */
     public function __construct(
         LoyaltyManager $loyaltyManager,
         LoggerInterface $logger
@@ -28,6 +32,12 @@ class SyncCustomerLoyaltyAfterOrderChange implements ObserverInterface
         $this->logger = $logger;
     }
 
+    /**
+     * Sync customer loyalty after order change.
+     *
+     * @param Observer $observer
+     * @return void
+     */
     public function execute(Observer $observer)
     {
         $order = $this->getOrderFromObserver($observer);
@@ -45,6 +55,12 @@ class SyncCustomerLoyaltyAfterOrderChange implements ObserverInterface
         }
     }
 
+    /**
+     * Get order from observer event.
+     *
+     * @param Observer $observer
+     * @return Order|null
+     */
     private function getOrderFromObserver(Observer $observer): ?Order
     {
         $event = $observer->getEvent();

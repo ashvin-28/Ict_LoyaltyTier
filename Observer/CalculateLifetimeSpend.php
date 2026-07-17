@@ -1,41 +1,46 @@
 <?php
+
 namespace Ict\LoyaltyTier\Observer;
 
+use Ict\LoyaltyTier\Model\ResourceModel\Exam;
+use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
-use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Sales\Model\Order;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 
-// $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/observer.log');
-//         $logger = new \Zend_Log();
-//         $logger->addWriter($writer);
-//         $logger->info('Observer Triggered');
 class CalculateLifetimeSpend implements ObserverInterface
 {
     /** @var CustomerRepositoryInterface */
-    protected $customerRepository;
+    private $customerRepository;
 
     /** @var OrderCollectionFactory */
-    protected $orderCollectionFactory;
+    private $orderCollectionFactory;
 
-    /** @var \Ict\LoyaltyTier\Model\ResourceModel\Exam */
-    protected $loyaltyTierRepository;
+    /** @var Exam */
+    private $loyaltyTierRepository;
 
     /**
      * @param CustomerRepositoryInterface $customerRepository
      * @param OrderCollectionFactory $orderCollectionFactory
-     * @param \Ict\LoyaltyTier\Model\ResourceModel\Exam $loyaltyTierRepository
+     * @param Exam $loyaltyTierRepository
      */
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
         OrderCollectionFactory $orderCollectionFactory,
-        \Ict\LoyaltyTier\Model\ResourceModel\Exam $loyaltyTierRepository
+        Exam $loyaltyTierRepository
     ) {
         $this->customerRepository = $customerRepository;
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->loyaltyTierRepository = $loyaltyTierRepository;
     }
 
+    /**
+     * Update customer tier from order event.
+     *
+     * @param Observer $observer
+     * @return void
+     */
     public function execute(Observer $observer)
     {
         /** @var \Magento\Sales\Model\Order $order */
@@ -68,7 +73,7 @@ class CalculateLifetimeSpend implements ObserverInterface
     {
         $collection = $this->orderCollectionFactory->create()
             ->addFieldToFilter('customer_id', $customerId)
-            ->addFieldToFilter('state', ['neq' => \Magento\Sales\Model\Order::STATE_CANCELED]);
+            ->addFieldToFilter('state', ['neq' => Order::STATE_CANCELED]);
 
         $totalSales = 0;
         foreach ($collection as $order) {

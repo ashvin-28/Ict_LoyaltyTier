@@ -3,15 +3,27 @@
 namespace Ict\LoyaltyTier\Setup\Patch\Data;
 
 use Magento\Customer\Model\Customer;
+use Magento\Customer\Setup\CustomerSetup;
 use Magento\Customer\Setup\CustomerSetupFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 
 class AddCustomerAttributes implements DataPatchInterface
 {
+    /**
+     * @var ModuleDataSetupInterface
+     */
     private $moduleDataSetup;
+
+    /**
+     * @var CustomerSetupFactory
+     */
     private $customerSetupFactory;
 
+    /**
+     * @param ModuleDataSetupInterface $moduleDataSetup
+     * @param CustomerSetupFactory $customerSetupFactory
+     */
     public function __construct(
         ModuleDataSetupInterface $moduleDataSetup,
         CustomerSetupFactory $customerSetupFactory
@@ -20,13 +32,16 @@ class AddCustomerAttributes implements DataPatchInterface
         $this->customerSetupFactory = $customerSetupFactory;
     }
 
+    /**
+     * Apply customer loyalty attributes.
+     *
+     * @return void
+     */
     public function apply()
     {
         $this->moduleDataSetup->getConnection()->startSetup();
 
         $customerSetup = $this->customerSetupFactory->create(['setup' => $this->moduleDataSetup]);
-
-
 
         $this->addAttributeIfMissing(
             $customerSetup,
@@ -43,7 +58,6 @@ class AddCustomerAttributes implements DataPatchInterface
                 'is_visible_in_grid' => true,
                 'is_filterable_in_grid' => false,
                 'is_searchable_in_grid' => false,
-
             ],
             ['adminhtml_customer']
         );
@@ -51,21 +65,39 @@ class AddCustomerAttributes implements DataPatchInterface
         $this->moduleDataSetup->getConnection()->endSetup();
     }
 
-
+    /**
+     * Get patch dependencies.
+     *
+     * @return array
+     */
     public static function getDependencies()
     {
         return [];
     }
 
+    /**
+     * Get patch aliases.
+     *
+     * @return array
+     */
     public function getAliases()
     {
         return [
-            'Ict\Exam\Setup\Patch\Data\AddCustomerAttributes',
+            \Ict\Exam\Setup\Patch\Data\AddCustomerAttributes::class,
         ];
     }
 
+    /**
+     * Add attribute when missing.
+     *
+     * @param CustomerSetup $customerSetup
+     * @param string $attributeCode
+     * @param array $attributeData
+     * @param array $forms
+     * @return void
+     */
     private function addAttributeIfMissing(
-        \Magento\Customer\Setup\CustomerSetup $customerSetup,
+        CustomerSetup $customerSetup,
         string $attributeCode,
         array $attributeData,
         array $forms

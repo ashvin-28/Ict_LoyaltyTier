@@ -5,7 +5,6 @@ namespace Ict\LoyaltyTier\Observer;
 use Ict\LoyaltyTier\Model\Exam;
 use Ict\LoyaltyTier\Model\LoyaltyManager;
 use Magento\Customer\Api\CustomerRepositoryInterface;
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -30,18 +29,27 @@ class CopyQuoteLoyaltyDataToOrder implements ObserverInterface
      */
     private $priceCurrency;
 
+    /**
+     * @param CustomerRepositoryInterface $customerRepository
+     * @param LoyaltyManager $loyaltyManager
+     * @param PriceCurrencyInterface $priceCurrency
+     */
     public function __construct(
-        ?CustomerRepositoryInterface $customerRepository = null,
-        ?LoyaltyManager $loyaltyManager = null,
-        ?PriceCurrencyInterface $priceCurrency = null
+        CustomerRepositoryInterface $customerRepository,
+        LoyaltyManager $loyaltyManager,
+        PriceCurrencyInterface $priceCurrency
     ) {
-        $objectManager = ObjectManager::getInstance();
-        $this->customerRepository = $customerRepository
-            ?: $objectManager->get(CustomerRepositoryInterface::class);
-        $this->loyaltyManager = $loyaltyManager ?: $objectManager->get(LoyaltyManager::class);
-        $this->priceCurrency = $priceCurrency ?: $objectManager->get(PriceCurrencyInterface::class);
+        $this->customerRepository = $customerRepository;
+        $this->loyaltyManager = $loyaltyManager;
+        $this->priceCurrency = $priceCurrency;
     }
 
+    /**
+     * Copy loyalty data from quote to order.
+     *
+     * @param Observer $observer
+     * @return void
+     */
     public function execute(Observer $observer)
     {
         /** @var Quote|null $quote */
@@ -69,6 +77,12 @@ class CopyQuoteLoyaltyDataToOrder implements ObserverInterface
         $order->setData('base_loyalty_discount_amount', $snapshot['base_loyalty_discount_amount']);
     }
 
+    /**
+     * Get quote loyalty snapshot.
+     *
+     * @param Quote $quote
+     * @return array
+     */
     private function getQuoteLoyaltySnapshot(Quote $quote): array
     {
         return [
@@ -79,6 +93,12 @@ class CopyQuoteLoyaltyDataToOrder implements ObserverInterface
         ];
     }
 
+    /**
+     * Build loyalty snapshot.
+     *
+     * @param Quote $quote
+     * @return array
+     */
     private function buildLoyaltySnapshot(Quote $quote): array
     {
         $emptySnapshot = [
@@ -120,6 +140,13 @@ class CopyQuoteLoyaltyDataToOrder implements ObserverInterface
         ];
     }
 
+    /**
+     * Calculate base discount.
+     *
+     * @param Quote $quote
+     * @param Exam $tier
+     * @return float
+     */
     private function calculateBaseDiscount(Quote $quote, Exam $tier): float
     {
         $baseDiscountableAmount = 0.0;
