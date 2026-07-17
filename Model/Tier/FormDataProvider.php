@@ -3,8 +3,8 @@
 namespace Ict\LoyaltyTier\Model\Tier;
 
 use Ict\LoyaltyTier\Model\ResourceModel\Tier\CollectionFactory;
+use Ict\LoyaltyTier\Model\TierImage;
 use Magento\Framework\App\RequestInterface;
-use Magento\Framework\Filesystem\Io\File;
 use Magento\Ui\DataProvider\AbstractDataProvider;
 
 class FormDataProvider extends AbstractDataProvider
@@ -25,9 +25,9 @@ class FormDataProvider extends AbstractDataProvider
     private $request;
 
     /**
-     * @var File
+     * @var TierImage
      */
-    private $fileIo;
+    private $tierImage;
 
     /**
      * @param string $name
@@ -35,7 +35,7 @@ class FormDataProvider extends AbstractDataProvider
      * @param string $requestFieldName
      * @param RequestInterface $request
      * @param CollectionFactory $collectionFactory
-     * @param File $fileIo
+     * @param TierImage $tierImage
      * @param array $meta
      * @param array $data
      */
@@ -45,13 +45,13 @@ class FormDataProvider extends AbstractDataProvider
         $requestFieldName,
         RequestInterface $request,
         CollectionFactory $collectionFactory,
-        File $fileIo,
+        TierImage $tierImage,
         array $meta = [],
         array $data = []
     ) {
         $this->request = $request;
         $this->collectionFactory = $collectionFactory;
-        $this->fileIo = $fileIo;
+        $this->tierImage = $tierImage;
         parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data);
     }
 
@@ -89,14 +89,19 @@ class FormDataProvider extends AbstractDataProvider
                 $data = $item->getData();
 
                 if (!empty($data['image'])) {
-                    $fileName = $data['image'];
+                    $fileName = $this->tierImage->normalize($data['image']);
 
-                    $data['image'] = [
-                        [
-                            'name' => $this->fileIo->getPathInfo($fileName)['basename'],
-                            'url'  => '/media/' . $fileName
-                        ]
-                    ];
+                    if ($fileName) {
+                        $data['image'] = [
+                            [
+                                'name' => $this->tierImage->getFileName($fileName),
+                                'url' => $this->tierImage->getUrl($fileName),
+                                'file' => $fileName
+                            ]
+                        ];
+                    } else {
+                        unset($data['image']);
+                    }
                 }
 
                 $this->loadedData[$id] = $data;

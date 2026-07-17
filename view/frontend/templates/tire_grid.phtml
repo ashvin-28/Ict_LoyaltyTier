@@ -17,6 +17,7 @@ $hasTires = $tires && $tires->getSize();
                 <table class="data table" id="tire-data-table">
                     <thead>
                         <tr>
+                            <th><?= $escaper->escapeHtml(__('Image')) ?></th>
                             <th><?= $escaper->escapeHtml(__('Tier Name')) ?></th>
                             <th><?= $escaper->escapeHtml(__('Lifetime Spend')) ?></th>
                             <th><?= $escaper->escapeHtml(__('Minimum Spend')) ?></th>
@@ -29,8 +30,23 @@ $hasTires = $tires && $tires->getSize();
                     <tbody>
                         <?php foreach ($tires as $tire):
                             $reach = $next !== null ? max(0, $next - $spend) : null;
+                            $imageUrl = $block->getTierImageUrl($tire);
                             ?>
                             <tr>
+                                <td>
+                                    <?php if ($imageUrl): ?>
+                                        <img
+                                            class="loyalty-tier-image"
+                                            src="<?= $escaper->escapeUrl($imageUrl) ?>"
+                                            alt="<?= $escaper->escapeHtmlAttr($block->getTierImageAlt($tire)) ?>"
+                                            width="56"
+                                            height="56"
+                                            loading="lazy"
+                                        />
+                                    <?php else: ?>
+                                        <?= $escaper->escapeHtml(__('-')) ?>
+                                    <?php endif; ?>
+                                </td>
                                 <td><?= $escaper->escapeHtml($tire->getName()) ?></td>
                                 <td><?= $escaper->escapeHtml($block->formatCurrency($spend)) ?></td>
                                 <td><?= $escaper->escapeHtml($block->formatCurrency($tire->getMinimumSpend())) ?></td>

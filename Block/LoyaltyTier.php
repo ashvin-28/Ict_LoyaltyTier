@@ -9,6 +9,7 @@ use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Ict\LoyaltyTier\Model\ResourceModel\Tier\CollectionFactory as TierCollectionFactory;
 use Ict\LoyaltyTier\Model\LoyaltyManager;
+use Ict\LoyaltyTier\Model\TierImage;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 
 class LoyaltyTier extends Template
@@ -34,6 +35,11 @@ class LoyaltyTier extends Template
     private $loyaltyManager;
 
     /**
+     * @var TierImage
+     */
+    private $tierImage;
+
+    /**
      * @var PriceCurrencyInterface|null
      */
     private $priceCurrency;
@@ -44,6 +50,7 @@ class LoyaltyTier extends Template
      * @param TierCollectionFactory $tierCollectionFactory
      * @param OrderCollectionFactory $orderCollectionFactory
      * @param LoyaltyManager $loyaltyManager
+     * @param TierImage $tierImage
      * @param array $data
      * @param PriceCurrencyInterface|null $priceCurrency
      */
@@ -54,6 +61,7 @@ class LoyaltyTier extends Template
         TierCollectionFactory $tierCollectionFactory,
         OrderCollectionFactory $orderCollectionFactory,
         LoyaltyManager $loyaltyManager,
+        TierImage $tierImage,
         array $data = [],
         ?PriceCurrencyInterface $priceCurrency = null
     ) {
@@ -61,6 +69,7 @@ class LoyaltyTier extends Template
         $this->tierCollectionFactory = $tierCollectionFactory;
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->loyaltyManager = $loyaltyManager;
+        $this->tierImage = $tierImage;
         $this->priceCurrency = $priceCurrency;
         parent::__construct($context, $data);
     }
@@ -175,6 +184,28 @@ class LoyaltyTier extends Template
     public function formatPercent($value): string
     {
         return rtrim(rtrim(number_format((float) $value, 2, '.', ''), '0'), '.') . '%';
+    }
+
+    /**
+     * Get tier image URL.
+     *
+     * @param \Ict\LoyaltyTier\Model\Tier $tier
+     * @return string
+     */
+    public function getTierImageUrl($tier): string
+    {
+        return $this->tierImage->getUrl($tier->getData('image'));
+    }
+
+    /**
+     * Get tier image alt text.
+     *
+     * @param \Ict\LoyaltyTier\Model\Tier $tier
+     * @return string
+     */
+    public function getTierImageAlt($tier): string
+    {
+        return (string) $tier->getName();
     }
 
     /**

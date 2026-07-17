@@ -123,7 +123,7 @@
                         <allowedExtensions>jpg jpeg png</allowedExtensions>
                         <maxFileSize>2097152</maxFileSize>
                         <uploaderConfig>
-                            <param xsi:type="url" name="url" path="ict/index/upload" />
+                            <param xsi:type="url" name="url" path="loyaltytier/index/upload" />
                         </uploaderConfig>
                         <previewTmpl>Magento_Catalog/image-preview</previewTmpl>
                         <openDialogTitle>Select Image</openDialogTitle>

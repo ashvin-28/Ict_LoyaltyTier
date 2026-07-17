@@ -3,6 +3,7 @@
 namespace Ict\LoyaltyTier\Controller\Adminhtml\Index;
 
 use Ict\LoyaltyTier\Model\TierFactory;
+use Ict\LoyaltyTier\Model\TierImage;
 use Magento\Backend\App\Action;
 
 class Save extends Action
@@ -13,15 +14,23 @@ class Save extends Action
     private $tierFactory;
 
     /**
+     * @var TierImage
+     */
+    private $tierImage;
+
+    /**
      * @param Action\Context $context
      * @param TierFactory $tierFactory
+     * @param TierImage $tierImage
      */
     public function __construct(
         Action\Context $context,
-        TierFactory $tierFactory
+        TierFactory $tierFactory,
+        TierImage $tierImage
     ) {
         parent::__construct($context);
         $this->tierFactory = $tierFactory;
+        $this->tierImage = $tierImage;
     }
 
     /**
@@ -44,6 +53,10 @@ class Save extends Action
                 $model->load($data['entity_id']);
             }
 
+            if (array_key_exists('image', $data)) {
+                $data['image'] = $this->getImagePath($data['image']);
+            }
+
             try {
                 $model->setData($data);
                 $model->save();
@@ -56,5 +69,25 @@ class Save extends Action
         }
 
         return $this->_redirect('*/*/');
+    }
+
+    /**
+     * Get image path from image uploader data.
+     *
+     * @param array|string|null $imageData
+     * @return string
+     */
+    private function getImagePath($imageData): string
+    {
+        if (!is_array($imageData)) {
+            return $this->tierImage->normalize((string) $imageData);
+        }
+
+        $image = reset($imageData);
+        if (!is_array($image)) {
+            return '';
+        }
+
+        return $this->tierImage->normalize($image['file'] ?? $image['name'] ?? '');
     }
 }

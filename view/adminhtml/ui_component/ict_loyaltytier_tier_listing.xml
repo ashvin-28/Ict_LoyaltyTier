@@ -113,6 +113,14 @@
                 </item>
             </argument>
         </column>
+        <column name="image" class="Ict\LoyaltyTier\Ui\Component\Listing\Column\TierImage" component="Magento_Ui/js/grid/columns/thumbnail">
+            <settings>
+                <altField>name</altField>
+                <hasPreview>1</hasPreview>
+                <label translate="true">Image</label>
+                <sortable>false</sortable>
+            </settings>
+        </column>
         <column name="limit">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
