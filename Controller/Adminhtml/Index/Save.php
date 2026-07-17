@@ -2,26 +2,26 @@
 
 namespace Ict\LoyaltyTier\Controller\Adminhtml\Index;
 
+use Ict\LoyaltyTier\Model\TierFactory;
 use Magento\Backend\App\Action;
-use Ict\LoyaltyTier\Model\ExamFactory;
 
 class Save extends Action
 {
     /**
-     * @var ExamFactory
+     * @var TierFactory
      */
-    private $examFactory;
+    private $tierFactory;
 
     /**
      * @param Action\Context $context
-     * @param ExamFactory $examFactory
+     * @param TierFactory $tierFactory
      */
     public function __construct(
         Action\Context $context,
-        ExamFactory $examFactory
+        TierFactory $tierFactory
     ) {
         parent::__construct($context);
-        $this->examFactory = $examFactory;
+        $this->tierFactory = $tierFactory;
     }
 
     /**
@@ -38,7 +38,7 @@ class Save extends Action
                 unset($data['entity_id']);
             }
 
-            $model = $this->examFactory->create();
+            $model = $this->tierFactory->create();
 
             if (!empty($data['entity_id'])) {
                 $model->load($data['entity_id']);

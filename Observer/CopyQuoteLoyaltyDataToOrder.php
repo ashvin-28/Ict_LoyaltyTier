@@ -2,8 +2,8 @@
 
 namespace Ict\LoyaltyTier\Observer;
 
-use Ict\LoyaltyTier\Model\Exam;
 use Ict\LoyaltyTier\Model\LoyaltyManager;
+use Ict\LoyaltyTier\Model\Tier;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
@@ -144,10 +144,10 @@ class CopyQuoteLoyaltyDataToOrder implements ObserverInterface
      * Calculate base discount.
      *
      * @param Quote $quote
-     * @param Exam $tier
+     * @param Tier $tier
      * @return float
      */
-    private function calculateBaseDiscount(Quote $quote, Exam $tier): float
+    private function calculateBaseDiscount(Quote $quote, Tier $tier): float
     {
         $baseDiscountableAmount = 0.0;
         foreach ($quote->getAllVisibleItems() as $item) {

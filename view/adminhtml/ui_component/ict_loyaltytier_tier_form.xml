@@ -11,7 +11,7 @@
         <namespace>ict_loyaltytier_tier_form</namespace>
         <dataScope>data</dataScope>
         <buttons>
-            <button name="save" class="Ict\LoyaltyTier\Block\Adminhtml\Exam\Edit\Button\Save"/>
+            <button name="save" class="Ict\LoyaltyTier\Block\Adminhtml\Tier\Edit\Button\Save"/>
             <!-- <button name="back" class="Custommodule\Adminemp\Block\Adminhtml\Employee\Edit\Button\Back"/>
             <button name="saveedit" class="Custommodule\Adminemp\Block\Adminhtml\Employee\Edit\Button\SaveEdit"/>
             <button name="delete" class="Custommodule\Adminemp\Block\Adminhtml\Employee\Edit\Button\Delete"/> -->
@@ -28,13 +28,13 @@
         </argument>
         <argument name="dataProvider" xsi:type="configurableObject">
             <argument name="class" xsi:type="string">
-                Ict\LoyaltyTier\Model\Exam\FormDataProvider</argument>
+                Ict\LoyaltyTier\Model\Tier\FormDataProvider</argument>
             <argument name="name" xsi:type="string">ict_loyaltytier_tier_form_data_source</argument>
             <argument name="primaryFieldName" xsi:type="string">entity_id</argument>
             <argument name="requestFieldName" xsi:type="string">entity_id</argument>
         </argument>
         <settings>
-            <submitUrl path="exam/index/save" />
+            <submitUrl path="loyaltytier/index/save" />
         </settings>
     </dataSource>
     <fieldset name="general">

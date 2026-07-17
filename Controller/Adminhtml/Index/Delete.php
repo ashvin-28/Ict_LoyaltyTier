@@ -2,26 +2,26 @@
 
 namespace Ict\LoyaltyTier\Controller\Adminhtml\Index;
 
-use Ict\LoyaltyTier\Model\ExamFactory;
+use Ict\LoyaltyTier\Model\TierFactory;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 
 class Delete extends Action
 {
     /**
-     * @var ExamFactory
+     * @var TierFactory
      */
-    private $examFactory;
+    private $tierFactory;
 
     /**
      * @param Context $context
-     * @param ExamFactory $examFactory
+     * @param TierFactory $tierFactory
      */
     public function __construct(
         Context $context,
-        ExamFactory $examFactory
+        TierFactory $tierFactory
     ) {
-        $this->examFactory = $examFactory;
+        $this->tierFactory = $tierFactory;
         parent::__construct($context);
     }
 
@@ -35,9 +35,9 @@ class Delete extends Action
         $resultRedirect = $this->resultRedirectFactory->create();
         $id = $this->getRequest()->getParam('entity_id');
         try {
-            $exam = $this->examFactory->create();
-            $exam->load($id);
-            $exam->delete();
+            $tier = $this->tierFactory->create();
+            $tier->load($id);
+            $tier->delete();
             $this->messageManager->addSuccessMessage(__('You deleted the Tier.'));
         } catch (\Exception $e) {
             $this->messageManager->addErrorMessage($e->getMessage());

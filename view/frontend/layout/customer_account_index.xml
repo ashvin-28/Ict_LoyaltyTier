@@ -6,9 +6,9 @@
            name="custom.dashboard.block" 
            template="Ict_LoyaltyTier::dashboard_info.phtml" />
            <block 
-           class="Ict\LoyaltyTier\Block\Exam" name="customer_account_navigation_tire_grid"  template="Ict_LoyaltyTier::tire_grid.phtml" >
+           class="Ict\LoyaltyTier\Block\LoyaltyTier" name="customer_account_navigation_tire_grid"  template="Ict_LoyaltyTier::tire_grid.phtml" >
                 <arguments>
-                    <!-- <argument name="path" xsi:type="string">exam/index/tire</argument> -->
+                    <!-- <argument name="path" xsi:type="string">loyaltytier/index/tire</argument> -->
                     <argument name="label" xsi:type="string">My Tires</argument>
                 </arguments>
             </block>

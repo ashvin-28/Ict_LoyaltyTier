@@ -82,9 +82,7 @@ class AddCustomerAttributes implements DataPatchInterface
      */
     public function getAliases()
     {
-        return [
-            \Ict\Exam\Setup\Patch\Data\AddCustomerAttributes::class,
-        ];
+        return [];
     }
 
     /**

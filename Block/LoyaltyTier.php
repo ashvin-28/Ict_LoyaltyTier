@@ -7,11 +7,11 @@ use Magento\Framework\View\Element\Template\Context;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
-use Ict\LoyaltyTier\Model\ResourceModel\Exam\CollectionFactory as ExamCollectionFactory;
+use Ict\LoyaltyTier\Model\ResourceModel\Tier\CollectionFactory as TierCollectionFactory;
 use Ict\LoyaltyTier\Model\LoyaltyManager;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 
-class Exam extends Template
+class LoyaltyTier extends Template
 {
     /**
      * @var CustomerSession
@@ -19,9 +19,9 @@ class Exam extends Template
     private $customerSession;
 
     /**
-     * @var ExamCollectionFactory
+     * @var TierCollectionFactory
      */
-    private $examCollectionFactory;
+    private $tierCollectionFactory;
 
     /**
      * @var OrderCollectionFactory
@@ -41,7 +41,7 @@ class Exam extends Template
     /**
      * @param Context $context
      * @param CustomerSession $customerSession
-     * @param ExamCollectionFactory $examCollectionFactory
+     * @param TierCollectionFactory $tierCollectionFactory
      * @param OrderCollectionFactory $orderCollectionFactory
      * @param LoyaltyManager $loyaltyManager
      * @param array $data
@@ -51,14 +51,14 @@ class Exam extends Template
         Context $context,
         // phpcs:ignore MEQP2.Classes.MutableObjects.MutableObjects
         CustomerSession $customerSession,
-        ExamCollectionFactory $examCollectionFactory,
+        TierCollectionFactory $tierCollectionFactory,
         OrderCollectionFactory $orderCollectionFactory,
         LoyaltyManager $loyaltyManager,
         array $data = [],
         ?PriceCurrencyInterface $priceCurrency = null
     ) {
         $this->customerSession = $customerSession;
-        $this->examCollectionFactory = $examCollectionFactory;
+        $this->tierCollectionFactory = $tierCollectionFactory;
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->loyaltyManager = $loyaltyManager;
         $this->priceCurrency = $priceCurrency;
@@ -68,7 +68,7 @@ class Exam extends Template
     /**
      * Get current customer tier data.
      *
-     * @return \Ict\LoyaltyTier\Model\ResourceModel\Exam\Collection|false
+     * @return \Ict\LoyaltyTier\Model\ResourceModel\Tier\Collection|false
      */
     public function getTireData()
     {
@@ -79,7 +79,7 @@ class Exam extends Template
             return false;
         }
 
-        $collection = $this->examCollectionFactory->create();
+        $collection = $this->tierCollectionFactory->create();
         $collection->addFieldToFilter('status', 1);
         $collection->addFieldToFilter('minimum_spend', ['lteq' => $spend]);
         $collection->setOrder('minimum_spend', 'DESC');
@@ -91,7 +91,7 @@ class Exam extends Template
     /**
      * Get next loyalty tier.
      *
-     * @return \Ict\LoyaltyTier\Model\Exam|false
+     * @return \Ict\LoyaltyTier\Model\Tier|false
      */
     public function getNextTier()
     {
@@ -102,7 +102,7 @@ class Exam extends Template
             return false;
         }
 
-        $collection = $this->examCollectionFactory->create();
+        $collection = $this->tierCollectionFactory->create();
         $collection->addFieldToFilter('status', 1);
         $collection->addFieldToFilter('minimum_spend', ['gt' => $spend]);
         $collection->setOrder('minimum_spend', 'ASC');
@@ -131,7 +131,7 @@ class Exam extends Template
     /**
      * Get remaining usage limit for tier.
      *
-     * @param \Ict\LoyaltyTier\Model\Exam $tier
+     * @param \Ict\LoyaltyTier\Model\Tier $tier
      * @return \Magento\Framework\Phrase|int
      */
     public function getRemainingUsageLimit($tier)

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ict\LoyaltyTier\Block\Adminhtml\Exam\Edit\Button;
+namespace Ict\LoyaltyTier\Block\Adminhtml\Tier\Edit\Button;
 
 use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;
 

@@ -1,9 +1,9 @@
 <?php
 
-namespace Ict\LoyaltyTier\Model\ResourceModel\Exam;
+namespace Ict\LoyaltyTier\Model\ResourceModel\Tier;
 
-use Ict\LoyaltyTier\Model\Exam;
-use Ict\LoyaltyTier\Model\ResourceModel\Exam as ExamResource;
+use Ict\LoyaltyTier\Model\Tier;
+use Ict\LoyaltyTier\Model\ResourceModel\Tier as TierResource;
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 
 class Collection extends AbstractCollection
@@ -17,8 +17,8 @@ class Collection extends AbstractCollection
     {
         $this->_setIdFieldName('entity_id');
         $this->_init(
-            Exam::class,
-            ExamResource::class
+            Tier::class,
+            TierResource::class
         );
     }
 }

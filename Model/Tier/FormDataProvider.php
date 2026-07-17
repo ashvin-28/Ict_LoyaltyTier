@@ -1,8 +1,8 @@
 <?php
 
-namespace Ict\LoyaltyTier\Model\Exam;
+namespace Ict\LoyaltyTier\Model\Tier;
 
-use Ict\LoyaltyTier\Model\ResourceModel\Exam\CollectionFactory;
+use Ict\LoyaltyTier\Model\ResourceModel\Tier\CollectionFactory;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Filesystem\Io\File;
 use Magento\Ui\DataProvider\AbstractDataProvider;
@@ -58,7 +58,7 @@ class FormDataProvider extends AbstractDataProvider
     /**
      * Return collection.
      *
-     * @return \Ict\LoyaltyTier\Model\ResourceModel\Exam\Collection
+     * @return \Ict\LoyaltyTier\Model\ResourceModel\Tier\Collection
      */
     public function getCollection()
     {

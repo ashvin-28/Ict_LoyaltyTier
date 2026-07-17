@@ -2,7 +2,7 @@
 
 namespace Ict\LoyaltyTier\Model;
 
-use Ict\LoyaltyTier\Model\ResourceModel\Exam as TierResource;
+use Ict\LoyaltyTier\Model\ResourceModel\Tier as TierResource;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Customer\Model\Customer as CustomerModel;
@@ -33,7 +33,7 @@ class LoyaltyManager
     private $tierResource;
 
     /**
-     * @var ExamFactory
+     * @var TierFactory
      */
     private $tierFactory;
 
@@ -51,7 +51,7 @@ class LoyaltyManager
      * @param CustomerRepositoryInterface $customerRepository
      * @param OrderCollectionFactory $orderCollectionFactory
      * @param TierResource $tierResource
-     * @param ExamFactory $tierFactory
+     * @param TierFactory $tierFactory
      * @param IndexerRegistry|null $indexerRegistry
      * @param LoggerInterface|null $logger
      */
@@ -59,7 +59,7 @@ class LoyaltyManager
         CustomerRepositoryInterface $customerRepository,
         OrderCollectionFactory $orderCollectionFactory,
         TierResource $tierResource,
-        ExamFactory $tierFactory,
+        TierFactory $tierFactory,
         ?IndexerRegistry $indexerRegistry = null,
         ?LoggerInterface $logger = null
     ) {
@@ -99,9 +99,9 @@ class LoyaltyManager
      * Get highest active eligible tier.
      *
      * @param float $lifetimeSpend
-     * @return Exam|null
+     * @return Tier|null
      */
-    public function getHighestActiveEligibleTier(float $lifetimeSpend): ?Exam
+    public function getHighestActiveEligibleTier(float $lifetimeSpend): ?Tier
     {
         $tier = $this->tierResource->getHighestEligibleTier($lifetimeSpend, true);
 
@@ -112,15 +112,15 @@ class LoyaltyManager
      * Get active tier by ID.
      *
      * @param int $tierId
-     * @return Exam|null
+     * @return Tier|null
      */
-    public function getActiveTierById(int $tierId): ?Exam
+    public function getActiveTierById(int $tierId): ?Tier
     {
         if ($tierId <= 0) {
             return null;
         }
 
-        /** @var Exam $tier */
+        /** @var Tier $tier */
         $tier = $this->tierFactory->create()->load($tierId);
         if (!$tier->getId() || (int) $tier->getData('status') !== self::ACTIVE_STATUS) {
             return null;
@@ -133,9 +133,9 @@ class LoyaltyManager
      * Get customer discount tier.
      *
      * @param CustomerInterface $customer
-     * @return Exam|null
+     * @return Tier|null
      */
-    public function getCustomerDiscountTier(CustomerInterface $customer): ?Exam
+    public function getCustomerDiscountTier(CustomerInterface $customer): ?Tier
     {
         $customerId = (int) $customer->getId();
         if ($customerId > 0) {
@@ -168,10 +168,10 @@ class LoyaltyManager
      * Check whether customer can use tier discount.
      *
      * @param CustomerInterface $customer
-     * @param Exam $tier
+     * @param Tier $tier
      * @return bool
      */
-    public function canUseTierDiscount(CustomerInterface $customer, Exam $tier): bool
+    public function canUseTierDiscount(CustomerInterface $customer, Tier $tier): bool
     {
         $limit = (int) $tier->getData('limit');
         if ($limit <= 0) {
@@ -190,10 +190,10 @@ class LoyaltyManager
      * Get remaining tier usage for customer.
      *
      * @param int $customerId
-     * @param Exam $tier
+     * @param Tier $tier
      * @return int|null
      */
-    public function getRemainingUsageForCustomer(int $customerId, Exam $tier)
+    public function getRemainingUsageForCustomer(int $customerId, Tier $tier)
     {
         $limit = (int) $tier->getData('limit');
         if ($limit <= 0) {

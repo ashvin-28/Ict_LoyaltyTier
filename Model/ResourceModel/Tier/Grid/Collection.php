@@ -1,11 +1,11 @@
 <?php
 
-namespace Ict\LoyaltyTier\Model\ResourceModel\Exam\Grid;
+namespace Ict\LoyaltyTier\Model\ResourceModel\Tier\Grid;
 
 use Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult;
 
 /**
- * Collection class for the Exam Grid data source
+ * Collection class for the Tier Grid data source.
  */
 class Collection extends SearchResult
 {

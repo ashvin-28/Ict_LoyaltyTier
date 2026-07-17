@@ -2,7 +2,7 @@
 
 namespace Ict\LoyaltyTier\Observer;
 
-use Ict\LoyaltyTier\Model\ResourceModel\Exam;
+use Ict\LoyaltyTier\Model\ResourceModel\Tier;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
@@ -17,18 +17,18 @@ class CalculateLifetimeSpend implements ObserverInterface
     /** @var OrderCollectionFactory */
     private $orderCollectionFactory;
 
-    /** @var Exam */
+    /** @var Tier */
     private $loyaltyTierRepository;
 
     /**
      * @param CustomerRepositoryInterface $customerRepository
      * @param OrderCollectionFactory $orderCollectionFactory
-     * @param Exam $loyaltyTierRepository
+     * @param Tier $loyaltyTierRepository
      */
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
         OrderCollectionFactory $orderCollectionFactory,
-        Exam $loyaltyTierRepository
+        Tier $loyaltyTierRepository
     ) {
         $this->customerRepository = $customerRepository;
         $this->orderCollectionFactory = $orderCollectionFactory;

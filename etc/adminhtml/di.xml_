@@ -2,14 +2,14 @@
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">
-                <item name="ict_loyaltytier_tier_listing_data_source" xsi:type="string">Ict\LoyaltyTier\Model\ResourceModel\Exam\Grid\Collection</item>
+                <item name="ict_loyaltytier_tier_listing_data_source" xsi:type="string">Ict\LoyaltyTier\Model\ResourceModel\Tier\Grid\Collection</item>
             </argument>
         </arguments>
     </type>
-    <virtualType name="Ict\LoyaltyTier\Model\ResourceModel\Exam\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+    <virtualType name="Ict\LoyaltyTier\Model\ResourceModel\Tier\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
         <arguments>
             <argument name="mainTable" xsi:type="string">loyalty</argument>
-            <argument name="resourceModel" xsi:type="string">Ict\LoyaltyTier\Model\ResourceModel\Exam</argument>
+            <argument name="resourceModel" xsi:type="string">Ict\LoyaltyTier\Model\ResourceModel\Tier</argument>
         </arguments>
     </virtualType>
 </config>

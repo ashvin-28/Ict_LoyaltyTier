@@ -12,7 +12,7 @@
          module="Ict_LoyaltyTier"
          sortOrder="20"
          parent="Ict_LoyaltyTier::main"
-         action="exam/index/index"
+         action="loyaltytier/index/index"
          resource="Ict_LoyaltyTier::subitem"/>
   </menu>
 </config>

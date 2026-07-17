@@ -9,8 +9,8 @@ use Magento\Ui\Component\Listing\Columns\Column;
 
 class Actions extends Column
 {
-    public const URL_PATH_EDIT = 'exam/index/edit';
-    public const URL_PATH_DELETE = 'exam/index/delete';
+    public const URL_PATH_EDIT = 'loyaltytier/index/edit';
+    public const URL_PATH_DELETE = 'loyaltytier/index/delete';
 
     /**
      * @var UrlInterface

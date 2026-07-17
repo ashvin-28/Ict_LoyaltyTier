@@ -100,9 +100,7 @@ class AddCustomerLoyaltyStateAttributes implements DataPatchInterface
      */
     public function getAliases()
     {
-        return [
-            \Ict\Exam\Setup\Patch\Data\AddCustomerLoyaltyStateAttributes::class,
-        ];
+        return [];
     }
 
     /**

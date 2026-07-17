@@ -2,7 +2,7 @@
 
 namespace Ict\LoyaltyTier\Observer;
 
-use Ict\LoyaltyTier\Model\ResourceModel\Exam;
+use Ict\LoyaltyTier\Model\ResourceModel\Tier;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
@@ -22,9 +22,9 @@ class UpdateLoyaltyTier implements ObserverInterface
     private $customerRepository;
 
     /**
-     * @var Exam
+     * @var Tier
      */
-    private $examTierResource;
+    private $tierResource;
 
     /**
      * @var LoggerInterface
@@ -34,18 +34,18 @@ class UpdateLoyaltyTier implements ObserverInterface
     /**
      * @param CollectionFactory $orderCollectionFactory
      * @param CustomerRepositoryInterface $customerRepository
-     * @param Exam $examTierResource
+     * @param Tier $tierResource
      * @param LoggerInterface $logger
      */
     public function __construct(
         CollectionFactory $orderCollectionFactory,
         CustomerRepositoryInterface $customerRepository,
-        Exam $examTierResource,
+        Tier $tierResource,
         LoggerInterface $logger
     ) {
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->customerRepository = $customerRepository;
-        $this->examTierResource = $examTierResource;
+        $this->tierResource = $tierResource;
         $this->logger = $logger;
     }
 

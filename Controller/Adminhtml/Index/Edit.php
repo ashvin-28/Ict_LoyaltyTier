@@ -2,7 +2,7 @@
 
 namespace Ict\LoyaltyTier\Controller\Adminhtml\Index;
 
-use Ict\LoyaltyTier\Model\ExamFactory;
+use Ict\LoyaltyTier\Model\TierFactory;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\View\Result\PageFactory;
@@ -15,23 +15,23 @@ class Edit extends Action
     private $resultPageFactory;
 
     /**
-     * @var ExamFactory
+     * @var TierFactory
      */
-    private $examFactory;
+    private $tierFactory;
 
     /**
      * @param Context $context
      * @param PageFactory $resultPageFactory
-     * @param ExamFactory $examFactory
+     * @param TierFactory $tierFactory
      */
     public function __construct(
         Context $context,
         PageFactory $resultPageFactory,
-        ExamFactory $examFactory
+        TierFactory $tierFactory
     ) {
         parent::__construct($context);
         $this->resultPageFactory = $resultPageFactory;
-        $this->examFactory = $examFactory;
+        $this->tierFactory = $tierFactory;
     }
 
     /**
@@ -46,17 +46,17 @@ class Edit extends Action
         $resultPage = $this->resultPageFactory->create();
 
         if ($id) {
-            $exam = $this->examFactory->create()->load($id);
+            $tier = $this->tierFactory->create()->load($id);
 
-            if ($exam->getId()) {
-                $name = $exam->getName();
+            if ($tier->getId()) {
+                $name = $tier->getName();
 
                 $resultPage->getConfig()->getTitle()->prepend(__('%1', $name));
             } else {
-                $resultPage->getConfig()->getTitle()->prepend(__('Exam Not Found'));
+                $resultPage->getConfig()->getTitle()->prepend(__('Tier Not Found'));
             }
         } else {
-            $resultPage->getConfig()->getTitle()->prepend(__('New Exam'));
+            $resultPage->getConfig()->getTitle()->prepend(__('New Tier'));
         }
 
         return $resultPage;

@@ -8,12 +8,9 @@ namespace Ict\LoyaltyTier\Model;
 use Magento\Framework\Model\AbstractModel;
 
 /**
- * CMS block model
- *
- * @method Block setStoreId(int $storeId)
- * @method int getStoreId()
+ * Loyalty tier model.
  */
-class Exam extends AbstractModel
+class Tier extends AbstractModel
 {
     /**
      * Dependency Initilization.
@@ -22,6 +19,6 @@ class Exam extends AbstractModel
      */
     public function _construct()
     {
-        $this->_init(\Ict\LoyaltyTier\Model\ResourceModel\Exam::class);
+        $this->_init(\Ict\LoyaltyTier\Model\ResourceModel\Tier::class);
     }
 }

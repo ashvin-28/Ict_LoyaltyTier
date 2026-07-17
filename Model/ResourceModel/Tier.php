@@ -2,29 +2,29 @@
 
 namespace Ict\LoyaltyTier\Model\ResourceModel;
 
-use Ict\LoyaltyTier\Model\ResourceModel\Exam\CollectionFactory;
+use Ict\LoyaltyTier\Model\ResourceModel\Tier\CollectionFactory;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Framework\Model\ResourceModel\Db\Context;
 
-class Exam extends AbstractDb
+class Tier extends AbstractDb
 {
     /**
      * @var CollectionFactory
      */
-    private $examCollectionFactory;
+    private $tierCollectionFactory;
 
     /**
      * @param Context $context
-     * @param CollectionFactory $examCollectionFactory
+     * @param CollectionFactory $tierCollectionFactory
      * @param string|null $connectionName
      */
     public function __construct(
         Context $context,
-        CollectionFactory $examCollectionFactory,
+        CollectionFactory $tierCollectionFactory,
         $connectionName = null
     ) {
         parent::__construct($context, $connectionName);
-        $this->examCollectionFactory = $examCollectionFactory;
+        $this->tierCollectionFactory = $tierCollectionFactory;
     }
 
     /**
@@ -43,11 +43,11 @@ class Exam extends AbstractDb
      *
      * @param float|int $lifetimeSpend
      * @param bool $activeOnly
-     * @return \Ict\LoyaltyTier\Model\Exam
+     * @return \Ict\LoyaltyTier\Model\Tier
      */
     public function getHighestEligibleTier($lifetimeSpend, bool $activeOnly = true)
     {
-        $collection = $this->examCollectionFactory->create();
+        $collection = $this->tierCollectionFactory->create();
         if ($activeOnly) {
             $collection->addFieldToFilter('status', 1);
         }
@@ -66,11 +66,11 @@ class Exam extends AbstractDb
      *
      * @param string $name
      * @param bool $activeOnly
-     * @return \Ict\LoyaltyTier\Model\Exam
+     * @return \Ict\LoyaltyTier\Model\Tier
      */
     public function getTierByName(string $name, bool $activeOnly = true)
     {
-        $collection = $this->examCollectionFactory->create();
+        $collection = $this->tierCollectionFactory->create();
         if ($activeOnly) {
             $collection->addFieldToFilter('status', 1);
         }
