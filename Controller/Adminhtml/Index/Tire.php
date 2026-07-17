@@ -1,18 +1,38 @@
 <?php
+
 namespace Ict\LoyaltyTier\Controller\Customer;
 
-class Tire extends \Magento\Customer\Controller\AbstractAccount
+use Magento\Customer\Controller\AbstractAccount;
+use Magento\Customer\Model\Session;
+use Magento\Framework\App\Action\Context;
+use Magento\Framework\View\Result\PageFactory;
+
+class Tire extends AbstractAccount
 {
-    protected $resultPageFactory;
+    /**
+     * @var PageFactory
+     */
+    private $resultPageFactory;
+
+    /**
+     * @param Context $context
+     * @param Session $customerSession
+     * @param PageFactory $resultPageFactory
+     */
     public function __construct(
-        \Magento\Framework\App\Action\Context $context,
-        \Magento\Customer\Model\Session $customerSession,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory
+        Context $context,
+        Session $customerSession,
+        PageFactory $resultPageFactory
     ) {
         $this->resultPageFactory = $resultPageFactory;
         parent::__construct($context, $customerSession);
     }
 
+    /**
+     * Show customer tire page.
+     *
+     * @return \Magento\Framework\View\Result\Page
+     */
     public function execute()
     {
         $resultPage = $this->resultPageFactory->create();

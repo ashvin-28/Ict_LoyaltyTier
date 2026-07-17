@@ -1,15 +1,17 @@
 <?php
+
 namespace Ict\LoyaltyTier\Model\ResourceModel;
 
 use Ict\LoyaltyTier\Model\ResourceModel\Exam\CollectionFactory;
+use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Framework\Model\ResourceModel\Db\Context;
 
-class Exam extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
+class Exam extends AbstractDb
 {
     /**
      * @var CollectionFactory
      */
-    protected $examCollectionFactory;
+    private $examCollectionFactory;
 
     /**
      * @param Context $context
@@ -26,19 +28,22 @@ class Exam extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
     }
 
     /**
-     * Resource initialization
+     * Resource initialization.
+     *
      * @return void
      */
+    // phpcs:ignore MEQP2.PHP.ProtectedClassMember.FoundProtected
     protected function _construct()
     {
-        // Table name and primary key
-        $this->_init("loyalty", "entity_id");
+        $this->_init('loyalty', 'entity_id');
     }
 
     /**
+     * Get highest eligible tier.
+     *
      * @param float|int $lifetimeSpend
      * @param bool $activeOnly
-     * @return \Ict\LoyaltyTier\Model\ResourceModel\Exam\Collection
+     * @return \Ict\LoyaltyTier\Model\Exam
      */
     public function getHighestEligibleTier($lifetimeSpend, bool $activeOnly = true)
     {
@@ -49,12 +54,16 @@ class Exam extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
         $collection->addFieldToFilter('minimum_spend', ['lteq' => $lifetimeSpend]);
         $collection->setOrder('minimum_spend', 'DESC');
         $collection->setPageSize(1);
+        $collection->load();
+        $items = $collection->getItems();
+        $item = reset($items);
 
-        // return $collection;
-        return $collection->getFirstItem();
+        return $item ?: $collection->getNewEmptyItem();
     }
 
     /**
+     * Get tier by name.
+     *
      * @param string $name
      * @param bool $activeOnly
      * @return \Ict\LoyaltyTier\Model\Exam
@@ -67,7 +76,10 @@ class Exam extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
         }
         $collection->addFieldToFilter('name', $name);
         $collection->setPageSize(1);
+        $collection->load();
+        $items = $collection->getItems();
+        $item = reset($items);
 
-        return $collection->getFirstItem();
+        return $item ?: $collection->getNewEmptyItem();
     }
 }

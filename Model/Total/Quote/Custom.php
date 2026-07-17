@@ -30,23 +30,39 @@ class Custom extends AbstractTotal
      */
     private $loyaltyManager;
 
+    /**
+     * @param PriceCurrencyInterface $priceCurrency
+     * @param CustomerRepositoryInterface $customerRepository
+     * @param LoyaltyManager $loyaltyManager
+     */
     public function __construct(
         PriceCurrencyInterface $priceCurrency,
         CustomerRepositoryInterface $customerRepository,
         LoyaltyManager $loyaltyManager
     ) {
-        $this->setCode(self::TOTAL_CODE);
         $this->priceCurrency = $priceCurrency;
         $this->customerRepository = $customerRepository;
         $this->loyaltyManager = $loyaltyManager;
     }
 
-    public function _resetState(): void
+    /**
+     * Retrieve total code.
+     *
+     * @return string
+     */
+    public function getCode()
     {
-        parent::_resetState();
-        $this->setCode(self::TOTAL_CODE);
+        return self::TOTAL_CODE;
     }
 
+    /**
+     * Collect loyalty discount total.
+     *
+     * @param Quote $quote
+     * @param ShippingAssignmentInterface $shippingAssignment
+     * @param Total $total
+     * @return $this
+     */
     public function collect(
         Quote $quote,
         ShippingAssignmentInterface $shippingAssignment,
@@ -100,6 +116,13 @@ class Custom extends AbstractTotal
         return $this;
     }
 
+    /**
+     * Fetch loyalty discount total row.
+     *
+     * @param Quote $quote
+     * @param Total $total
+     * @return array
+     */
     public function fetch(Quote $quote, Total $total)
     {
         $amount = (float) $total->getTotalAmount(self::TOTAL_CODE);
@@ -122,11 +145,22 @@ class Custom extends AbstractTotal
         ];
     }
 
+    /**
+     * Get loyalty discount label.
+     *
+     * @return \Magento\Framework\Phrase
+     */
     public function getLabel()
     {
         return __('Tire Discount');
     }
 
+    /**
+     * Reset quote loyalty data.
+     *
+     * @param Quote $quote
+     * @return void
+     */
     private function resetQuoteLoyaltyData(Quote $quote): void
     {
         $quote->setData('loyalty_tier_id', null);
@@ -136,6 +170,13 @@ class Custom extends AbstractTotal
         $quote->setData('base_loyalty_discount_amount', 0);
     }
 
+    /**
+     * Get base discountable amount.
+     *
+     * @param ShippingAssignmentInterface $shippingAssignment
+     * @param Total $total
+     * @return float
+     */
     private function getBaseDiscountableAmount(
         ShippingAssignmentInterface $shippingAssignment,
         Total $total
@@ -159,6 +200,12 @@ class Custom extends AbstractTotal
         return max(0.0, (float) array_sum($baseAmounts));
     }
 
+    /**
+     * Get persisted applied loyalty discount amount.
+     *
+     * @param Quote $quote
+     * @return float
+     */
     private function getPersistedAppliedLoyaltyDiscountAmount(Quote $quote): float
     {
         if ((int) $quote->getItemsCount() <= 0 || (int) $quote->getCustomerId() <= 0) {
@@ -214,6 +261,12 @@ class Custom extends AbstractTotal
         return $appliedDiscount;
     }
 
+    /**
+     * Get loyalty discount title.
+     *
+     * @param Quote $quote
+     * @return \Magento\Framework\Phrase
+     */
     private function getTitle(Quote $quote): \Magento\Framework\Phrase
     {
         $tierName = trim((string) $quote->getData('loyalty_tier_name'));
@@ -230,6 +283,12 @@ class Custom extends AbstractTotal
         return __('Tire Discount');
     }
 
+    /**
+     * Get discount percent.
+     *
+     * @param Quote $quote
+     * @return float|null
+     */
     private function getDiscountPercent(Quote $quote): ?float
     {
         $discountPercent = (float) $quote->getData('loyalty_discount_percent');
@@ -252,6 +311,12 @@ class Custom extends AbstractTotal
         return $discountPercent > 0.0001 ? $discountPercent : null;
     }
 
+    /**
+     * Format percentage.
+     *
+     * @param float $percent
+     * @return string
+     */
     private function formatPercent(float $percent): string
     {
         return rtrim(rtrim(sprintf('%.2F', $percent), '0'), '.');

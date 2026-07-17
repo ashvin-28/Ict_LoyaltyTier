@@ -1,4 +1,5 @@
 <?php
+
 namespace Ict\LoyaltyTier\Controller\Adminhtml\Index;
 
 use Magento\Backend\App\Action;
@@ -10,7 +11,7 @@ class Add extends Action
     /**
      * @var PageFactory
      */
-    protected $resultPageFactory;
+    private $resultPageFactory;
 
     /**
      * @param Context $context
@@ -25,6 +26,8 @@ class Add extends Action
     }
 
     /**
+     * Add loyalty tier page.
+     *
      * @return \Magento\Backend\Model\View\Result\Page
      */
     public function execute()

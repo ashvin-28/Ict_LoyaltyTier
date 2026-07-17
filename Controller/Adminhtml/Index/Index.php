@@ -7,8 +7,15 @@ use Magento\Framework\View\Result\PageFactory;
 
 class Index extends Action
 {
-    protected $resultPageFactory;
+    /**
+     * @var PageFactory
+     */
+    private $resultPageFactory;
 
+    /**
+     * @param Action\Context $context
+     * @param PageFactory $resultPageFactory
+     */
     public function __construct(
         Action\Context $context,
         PageFactory $resultPageFactory
@@ -17,9 +24,14 @@ class Index extends Action
         $this->resultPageFactory = $resultPageFactory;
     }
 
+    /**
+     * Manage loyalty tiers page.
+     *
+     * @return \Magento\Framework\View\Result\Page
+     */
     public function execute()
     {
-         $resultPage = $this->resultPageFactory->create();
+        $resultPage = $this->resultPageFactory->create();
 
         $resultPage->getConfig()->getTitle()->prepend(__('Manage Tier'));
 

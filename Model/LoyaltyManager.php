@@ -38,15 +38,23 @@ class LoyaltyManager
     private $tierFactory;
 
     /**
-     * @var IndexerRegistry
+     * @var IndexerRegistry|null
      */
     private $indexerRegistry;
 
     /**
-     * @var LoggerInterface
+     * @var LoggerInterface|null
      */
     private $logger;
 
+    /**
+     * @param CustomerRepositoryInterface $customerRepository
+     * @param OrderCollectionFactory $orderCollectionFactory
+     * @param TierResource $tierResource
+     * @param ExamFactory $tierFactory
+     * @param IndexerRegistry|null $indexerRegistry
+     * @param LoggerInterface|null $logger
+     */
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
         OrderCollectionFactory $orderCollectionFactory,
@@ -59,10 +67,16 @@ class LoyaltyManager
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->tierResource = $tierResource;
         $this->tierFactory = $tierFactory;
-        $this->indexerRegistry = $indexerRegistry ?: ObjectManager::getInstance()->get(IndexerRegistry::class);
-        $this->logger = $logger ?: ObjectManager::getInstance()->get(LoggerInterface::class);
+        $this->indexerRegistry = $indexerRegistry;
+        $this->logger = $logger;
     }
 
+    /**
+     * Get customer lifetime spend.
+     *
+     * @param int $customerId
+     * @return float
+     */
     public function getCustomerLifetimeSpend(int $customerId): float
     {
         if ($customerId <= 0) {
@@ -81,6 +95,12 @@ class LoyaltyManager
         return $lifetimeSpend;
     }
 
+    /**
+     * Get highest active eligible tier.
+     *
+     * @param float $lifetimeSpend
+     * @return Exam|null
+     */
     public function getHighestActiveEligibleTier(float $lifetimeSpend): ?Exam
     {
         $tier = $this->tierResource->getHighestEligibleTier($lifetimeSpend, true);
@@ -88,6 +108,12 @@ class LoyaltyManager
         return $tier && $tier->getId() ? $tier : null;
     }
 
+    /**
+     * Get active tier by ID.
+     *
+     * @param int $tierId
+     * @return Exam|null
+     */
     public function getActiveTierById(int $tierId): ?Exam
     {
         if ($tierId <= 0) {
@@ -103,6 +129,12 @@ class LoyaltyManager
         return $tier;
     }
 
+    /**
+     * Get customer discount tier.
+     *
+     * @param CustomerInterface $customer
+     * @return Exam|null
+     */
     public function getCustomerDiscountTier(CustomerInterface $customer): ?Exam
     {
         $customerId = (int) $customer->getId();
@@ -132,6 +164,13 @@ class LoyaltyManager
         return null;
     }
 
+    /**
+     * Check whether customer can use tier discount.
+     *
+     * @param CustomerInterface $customer
+     * @param Exam $tier
+     * @return bool
+     */
     public function canUseTierDiscount(CustomerInterface $customer, Exam $tier): bool
     {
         $limit = (int) $tier->getData('limit');
@@ -147,6 +186,13 @@ class LoyaltyManager
         return $this->getTierUsageCountForCustomer($customerId, (int) $tier->getId()) < $limit;
     }
 
+    /**
+     * Get remaining tier usage for customer.
+     *
+     * @param int $customerId
+     * @param Exam $tier
+     * @return int|null
+     */
     public function getRemainingUsageForCustomer(int $customerId, Exam $tier)
     {
         $limit = (int) $tier->getData('limit');
@@ -157,6 +203,13 @@ class LoyaltyManager
         return max(0, $limit - $this->getTierUsageCountForCustomer($customerId, (int) $tier->getId()));
     }
 
+    /**
+     * Get tier usage count for customer.
+     *
+     * @param int $customerId
+     * @param int $tierId
+     * @return int
+     */
     public function getTierUsageCountForCustomer(int $customerId, int $tierId): int
     {
         if ($customerId <= 0 || $tierId <= 0) {
@@ -173,6 +226,12 @@ class LoyaltyManager
         return (int) $orders->getSize();
     }
 
+    /**
+     * Sync customer loyalty tier data.
+     *
+     * @param int $customerId
+     * @return void
+     */
     public function syncCustomerTier(int $customerId): void
     {
         if ($customerId <= 0) {
@@ -203,6 +262,10 @@ class LoyaltyManager
     }
 
     /**
+     * Get customer custom attribute value.
+     *
+     * @param CustomerInterface $customer
+     * @param string $attributeCode
      * @return mixed|null
      */
     private function getCustomerAttributeValue(CustomerInterface $customer, string $attributeCode)
@@ -212,17 +275,51 @@ class LoyaltyManager
         return $attribute ? $attribute->getValue() : null;
     }
 
+    /**
+     * Reindex customer grid row.
+     *
+     * @param int $customerId
+     * @return void
+     */
     private function reindexCustomerGridRow(int $customerId): void
     {
         try {
-            $this->indexerRegistry
+            $this->getIndexerRegistry()
                 ->get(CustomerModel::CUSTOMER_GRID_INDEXER_ID)
                 ->reindexRow($customerId);
         } catch (\Throwable $exception) {
-            $this->logger->error(
+            $this->getLogger()->error(
                 'Unable to reindex customer loyalty grid row.',
                 ['customer_id' => $customerId, 'exception' => $exception]
             );
         }
+    }
+
+    /**
+     * Get indexer registry.
+     *
+     * @return IndexerRegistry
+     */
+    private function getIndexerRegistry(): IndexerRegistry
+    {
+        if (!$this->indexerRegistry) {
+            $this->indexerRegistry = ObjectManager::getInstance()->get(IndexerRegistry::class);
+        }
+
+        return $this->indexerRegistry;
+    }
+
+    /**
+     * Get logger.
+     *
+     * @return LoggerInterface
+     */
+    private function getLogger(): LoggerInterface
+    {
+        if (!$this->logger) {
+            $this->logger = ObjectManager::getInstance()->get(LoggerInterface::class);
+        }
+
+        return $this->logger;
     }
 }

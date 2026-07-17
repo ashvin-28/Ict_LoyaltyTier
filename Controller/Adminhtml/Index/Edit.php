@@ -1,44 +1,55 @@
 <?php
+
 namespace Ict\LoyaltyTier\Controller\Adminhtml\Index;
 
+use Ict\LoyaltyTier\Model\ExamFactory;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\View\Result\PageFactory;
 
 class Edit extends Action
 {
-
     /**
      * @var PageFactory
      */
-    protected $resultPageFactory;
+    private $resultPageFactory;
+
+    /**
+     * @var ExamFactory
+     */
+    private $examFactory;
 
     /**
      * @param Context $context
      * @param PageFactory $resultPageFactory
+     * @param ExamFactory $examFactory
      */
     public function __construct(
         Context $context,
-        PageFactory $resultPageFactory
+        PageFactory $resultPageFactory,
+        ExamFactory $examFactory
     ) {
         parent::__construct($context);
         $this->resultPageFactory = $resultPageFactory;
+        $this->examFactory = $examFactory;
     }
 
-   
-
+    /**
+     * Edit loyalty tier page.
+     *
+     * @return \Magento\Framework\View\Result\Page
+     */
     public function execute()
     {
         $id = $this->getRequest()->getParam('entity_id');
-    
 
         $resultPage = $this->resultPageFactory->create();
 
         if ($id) {
-            $Exam = $this->_objectManager->create(\Ict\LoyaltyTier\Model\Exam::class)->load($id);
+            $exam = $this->examFactory->create()->load($id);
 
-            if ($Exam->getId()) {
-                $name = $Exam->getName();
+            if ($exam->getId()) {
+                $name = $exam->getName();
 
                 $resultPage->getConfig()->getTitle()->prepend(__('%1', $name));
             } else {

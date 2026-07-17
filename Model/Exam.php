@@ -15,13 +15,11 @@ use Magento\Framework\Model\AbstractModel;
  */
 class Exam extends AbstractModel
 {
-   
-   
- /**
-  * Dependency Initilization
-  *
-  * @return void
-  */
+    /**
+     * Dependency Initilization.
+     *
+     * @return void
+     */
     public function _construct()
     {
         $this->_init(\Ict\LoyaltyTier\Model\ResourceModel\Exam::class);
