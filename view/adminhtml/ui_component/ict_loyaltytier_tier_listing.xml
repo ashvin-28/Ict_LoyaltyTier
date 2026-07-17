@@ -38,7 +38,7 @@
         <bookmark name="bookmarks"/>
         <columnsControls name="columns_controls"/>
         <filterSearch name="fulltext"/>
-        <!-- <filters name="listing_filters">
+        <filters name="listing_filters">
             <settings>
                 <templates>
                     <filters>
@@ -60,7 +60,7 @@
                     </imports>
                 </settings>
             </filterSelect>
-        </filters> -->
+        </filters>
         <massaction name="listing_massaction">
             <action name="delete">
                 <settings>
