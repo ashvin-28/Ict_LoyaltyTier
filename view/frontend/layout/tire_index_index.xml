@@ -1,0 +1,9 @@
+<!-- File: app/code/Ict/LoyaltyTier/view/frontend/layout/Exam_index_index.xml -->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="2columns-left" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="customer_account"/>
+    <body>
+        <referenceContainer name="content">
+            <block class="Ict\LoyaltyTier\Block\Exam" name="tire.grid.view" template="Ict_LoyaltyTier::tire_grid.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

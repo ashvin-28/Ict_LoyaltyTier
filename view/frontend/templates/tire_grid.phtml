@@ -1,0 +1,48 @@
+<?php
+$tires = $block->getTireData();
+$spend = $block->getCustomerLifetimeSpend();
+
+$nextTier = $block->getNextTier();
+$next = ($nextTier && $nextTier->getId()) ? (float) $nextTier->getMinimumSpend() : null;
+?>
+<?php if ($tires && count($tires)): ?>
+    <div class="block block-dashboard-loyalty">
+        <div class="block-title">
+            <strong><?= $escaper->escapeHtml(__('Loyalty Tier Details')) ?></strong>
+        </div>
+        <div class="block-content">
+            <div class="table-wrapper">
+                <table class="data table" id="tire-data-table">
+                    <thead>
+                        <tr>
+                            <th><?= $escaper->escapeHtml(__('Tier Name')) ?></th>
+                            <th><?= $escaper->escapeHtml(__('Lifetime Spend')) ?></th>
+                            <th><?= $escaper->escapeHtml(__('Minimum Spend')) ?></th>
+                            <th><?= $escaper->escapeHtml(__('Spend to Next Tier')) ?></th>
+                            <th><?= $escaper->escapeHtml(__('Discount')) ?></th>
+                            <th><?= $escaper->escapeHtml(__('Usage Left')) ?></th>
+                            <th><?= $escaper->escapeHtml(__('Next Tier Discount')) ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($tires as $tire):
+                            $reach = $next !== null ? max(0, $next - $spend) : null;
+                            ?>
+                            <tr>
+                                <td><?= $escaper->escapeHtml($tire->getName()) ?></td>
+                                <td><?= $escaper->escapeHtml($block->formatCurrency($spend)) ?></td>
+                                <td><?= $escaper->escapeHtml($block->formatCurrency($tire->getMinimumSpend())) ?></td>
+                                <td><?= $reach !== null ? $escaper->escapeHtml($block->formatCurrency($reach)) : $escaper->escapeHtml(__('Highest Tier')) ?></td>
+                                <td><?= $escaper->escapeHtml($block->formatPercent($tire->getDiscount())) ?></td>
+                                <td><?= $escaper->escapeHtml($block->getRemainingUsageLimit($tire)) ?></td>
+                                <td><?= ($nextTier && $nextTier->getId()) ? $escaper->escapeHtml($block->formatPercent($nextTier->getDiscount())) : $escaper->escapeHtml(__('N/A')) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<?php else: ?>
+    <div class="message info"><span><?= __('No tire data found.') ?></span></div>
+<?php endif; ?>

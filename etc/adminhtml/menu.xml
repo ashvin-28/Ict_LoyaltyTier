@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+  <menu>
+    <add id="Ict_LoyaltyTier::main"
+         title="Loyality Program"
+         module="Ict_LoyaltyTier"
+         sortOrder="10"
+         resource="Ict_LoyaltyTier::main"/>
+    <add id="Ict_LoyaltyTier::subitem"
+         title="Grid"
+         module="Ict_LoyaltyTier"
+         sortOrder="20"
+         parent="Ict_LoyaltyTier::main"
+         action="exam/index/index"
+         resource="Ict_LoyaltyTier::subitem"/>
+  </menu>
+</config>

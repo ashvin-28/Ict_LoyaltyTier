@@ -1,0 +1,16 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="ict_loyaltytier_tier_listing_data_source" xsi:type="string">Ict\LoyaltyTier\Model\ResourceModel\Exam\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Ict\LoyaltyTier\Model\ResourceModel\Exam\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">loyalty</argument>
+            <argument name="resourceModel" xsi:type="string">Ict\LoyaltyTier\Model\ResourceModel\Exam</argument>
+        </arguments>
+    </virtualType>
+</config>
+    
