@@ -3,6 +3,7 @@
 namespace Ict\LoyaltyTier\Model;
 
 use Ict\LoyaltyTier\Model\ResourceModel\Tier as TierResource;
+use Ict\LoyaltyTier\Model\Email\Sender;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Customer\Model\Customer as CustomerModel;
@@ -16,6 +17,8 @@ use Psr\Log\LoggerInterface;
 class LoyaltyManager
 {
     private const ACTIVE_STATUS = 1;
+
+    private const ENCOURAGEMENT_TIER_ATTRIBUTE = 'loyalty_encouragement_email_tier_id';
 
     /**
      * @var CustomerRepositoryInterface
@@ -38,6 +41,16 @@ class LoyaltyManager
     private $tierFactory;
 
     /**
+     * @var Config|null
+     */
+    private $config;
+
+    /**
+     * @var Sender|null
+     */
+    private $emailSender;
+
+    /**
      * @var IndexerRegistry|null
      */
     private $indexerRegistry;
@@ -54,6 +67,8 @@ class LoyaltyManager
      * @param TierFactory $tierFactory
      * @param IndexerRegistry|null $indexerRegistry
      * @param LoggerInterface|null $logger
+     * @param Config|null $config
+     * @param Sender|null $emailSender
      */
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
@@ -61,7 +76,9 @@ class LoyaltyManager
         TierResource $tierResource,
         TierFactory $tierFactory,
         ?IndexerRegistry $indexerRegistry = null,
-        ?LoggerInterface $logger = null
+        ?LoggerInterface $logger = null,
+        ?Config $config = null,
+        ?Sender $emailSender = null
     ) {
         $this->customerRepository = $customerRepository;
         $this->orderCollectionFactory = $orderCollectionFactory;
@@ -69,6 +86,8 @@ class LoyaltyManager
         $this->tierFactory = $tierFactory;
         $this->indexerRegistry = $indexerRegistry;
         $this->logger = $logger;
+        $this->config = $config;
+        $this->emailSender = $emailSender;
     }
 
     /**
@@ -104,6 +123,19 @@ class LoyaltyManager
     public function getHighestActiveEligibleTier(float $lifetimeSpend): ?Tier
     {
         $tier = $this->tierResource->getHighestEligibleTier($lifetimeSpend, true);
+
+        return $tier && $tier->getId() ? $tier : null;
+    }
+
+    /**
+     * Get next active tier above lifetime spend.
+     *
+     * @param float $lifetimeSpend
+     * @return Tier|null
+     */
+    public function getNextActiveTier(float $lifetimeSpend): ?Tier
+    {
+        $tier = $this->tierResource->getNextTier($lifetimeSpend, true);
 
         return $tier && $tier->getId() ? $tier : null;
     }
@@ -234,6 +266,10 @@ class LoyaltyManager
      */
     public function syncCustomerTier(int $customerId): void
     {
+        if (!$this->getConfig()->isEnabled()) {
+            return;
+        }
+
         if ($customerId <= 0) {
             return;
         }
@@ -246,6 +282,9 @@ class LoyaltyManager
 
         $lifetimeSpend = $this->getCustomerLifetimeSpend($customerId);
         $tier = $this->getHighestActiveEligibleTier($lifetimeSpend);
+        $previousTier = $this->getActiveTierById(
+            (int) $this->getCustomerAttributeValue($customer, 'loyalty_tier_id')
+        );
 
         $customer->setCustomAttribute('lifetime_spend', $lifetimeSpend);
 
@@ -259,6 +298,109 @@ class LoyaltyManager
 
         $this->customerRepository->save($customer);
         $this->reindexCustomerGridRow($customerId);
+
+        if ($tier && $this->isTierUpgrade($previousTier, $tier)) {
+            $this->getEmailSender()->sendAchievementEmail($customer, $tier, $lifetimeSpend);
+        }
+
+        $this->sendEncouragementEmailForCustomer($customer, $lifetimeSpend);
+    }
+
+    /**
+     * Send encouragement email when the customer is close to the next tier.
+     *
+     * @param int $customerId
+     * @return void
+     */
+    public function sendEncouragementEmailIfEligible(int $customerId): void
+    {
+        if ($customerId <= 0) {
+            return;
+        }
+
+        try {
+            $customer = $this->customerRepository->getById($customerId);
+        } catch (NoSuchEntityException $exception) {
+            return;
+        }
+
+        $this->sendEncouragementEmailForCustomer($customer, $this->getCustomerLifetimeSpend($customerId));
+    }
+
+    /**
+     * Send encouragement email for a loaded customer.
+     *
+     * @param CustomerInterface $customer
+     * @param float $lifetimeSpend
+     * @return void
+     */
+    private function sendEncouragementEmailForCustomer(CustomerInterface $customer, float $lifetimeSpend): void
+    {
+        $storeId = (int) $customer->getStoreId();
+        if (!$this->getConfig()->isEncouragementEmailEnabled($storeId ?: null)) {
+            return;
+        }
+
+        $nextTier = $this->getNextActiveTier($lifetimeSpend);
+        if (!$nextTier || !$nextTier->getId()) {
+            return;
+        }
+
+        $nextTierMinimumSpend = (float) $nextTier->getMinimumSpend();
+        if ($nextTierMinimumSpend <= 0.0001) {
+            return;
+        }
+
+        $thresholdAmount = $nextTierMinimumSpend
+            * ($this->getConfig()->getEncouragementThreshold($storeId ?: null) / 100);
+        if ($lifetimeSpend < $thresholdAmount) {
+            return;
+        }
+
+        if ((int) $this->getCustomerAttributeValue($customer, self::ENCOURAGEMENT_TIER_ATTRIBUTE)
+            === (int) $nextTier->getId()
+        ) {
+            return;
+        }
+
+        $spendRemaining = max(0.0, $nextTierMinimumSpend - $lifetimeSpend);
+        if (!$this->getEmailSender()->sendEncouragementEmail($customer, $nextTier, $lifetimeSpend, $spendRemaining)) {
+            return;
+        }
+
+        $customer->setCustomAttribute(self::ENCOURAGEMENT_TIER_ATTRIBUTE, (int) $nextTier->getId());
+        try {
+            $this->customerRepository->save($customer);
+        } catch (\Throwable $exception) {
+            $this->getLogger()->error(
+                'Unable to save loyalty encouragement email marker.',
+                ['customer_id' => $customer->getId(), 'exception' => $exception]
+            );
+        }
+    }
+
+    /**
+     * Check whether new tier is an upgrade.
+     *
+     * @param Tier|null $previousTier
+     * @param Tier $newTier
+     * @return bool
+     */
+    private function isTierUpgrade(?Tier $previousTier, Tier $newTier): bool
+    {
+        if (!$newTier->getId()) {
+            return false;
+        }
+
+        if (!$previousTier || !$previousTier->getId()) {
+            return true;
+        }
+
+        if ((int) $previousTier->getId() === (int) $newTier->getId()) {
+            return false;
+        }
+
+        return (float) $newTier->getMinimumSpend() > (float) $previousTier->getMinimumSpend();
     }
 
     /**
@@ -273,6 +415,34 @@ class LoyaltyManager
         $attribute = $customer->getCustomAttribute($attributeCode);
 
         return $attribute ? $attribute->getValue() : null;
+    }
+
+    /**
+     * Get loyalty configuration.
+     *
+     * @return Config
+     */
+    private function getConfig(): Config
+    {
+        if (!$this->config) {
+            $this->config = ObjectManager::getInstance()->get(Config::class);
+        }
+
+        return $this->config;
+    }
+
+    /**
+     * Get email sender.
+     *
+     * @return Sender
+     */
+    private function getEmailSender(): Sender
+    {
+        if (!$this->emailSender) {
+            $this->emailSender = ObjectManager::getInstance()->get(Sender::class);
+        }
+
+        return $this->emailSender;
     }
 
     /**

@@ -7,6 +7,7 @@ use Magento\Framework\View\Element\Template\Context;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Ict\LoyaltyTier\Model\Config;
 use Ict\LoyaltyTier\Model\ResourceModel\Tier\CollectionFactory as TierCollectionFactory;
 use Ict\LoyaltyTier\Model\LoyaltyManager;
 use Ict\LoyaltyTier\Model\TierImage;
@@ -18,6 +19,11 @@ class LoyaltyTier extends Template
      * @var CustomerSession
      */
     private $customerSession;
+
+    /**
+     * @var Config|null
+     */
+    private $config;
 
     /**
      * @var TierCollectionFactory
@@ -53,6 +59,7 @@ class LoyaltyTier extends Template
      * @param TierImage $tierImage
      * @param array $data
      * @param PriceCurrencyInterface|null $priceCurrency
+     * @param Config|null $config
      */
     public function __construct(
         Context $context,
@@ -63,9 +70,11 @@ class LoyaltyTier extends Template
         LoyaltyManager $loyaltyManager,
         TierImage $tierImage,
         array $data = [],
-        ?PriceCurrencyInterface $priceCurrency = null
+        ?PriceCurrencyInterface $priceCurrency = null,
+        ?Config $config = null
     ) {
         $this->customerSession = $customerSession;
+        $this->config = $config;
         $this->tierCollectionFactory = $tierCollectionFactory;
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->loyaltyManager = $loyaltyManager;
@@ -81,6 +90,10 @@ class LoyaltyTier extends Template
      */
     public function getTireData()
     {
+        if (!$this->isEnabled()) {
+            return false;
+        }
+
         $spend = $this->getCustomerLifetimeSpend();
         $customerId = $this->customerSession->getCustomerId();
 
@@ -104,6 +117,10 @@ class LoyaltyTier extends Template
      */
     public function getNextTier()
     {
+        if (!$this->isEnabled()) {
+            return false;
+        }
+
         $spend = $this->getCustomerLifetimeSpend();
         $customerId = $this->customerSession->getCustomerId();
 
@@ -187,6 +204,26 @@ class LoyaltyTier extends Template
     }
 
     /**
+     * Check whether loyalty tier frontend block is enabled.
+     *
+     * @return bool
+     */
+    public function isEnabled(): bool
+    {
+        return $this->getConfig()->isEnabled();
+    }
+
+    /**
+     * Get configured frontend section title.
+     *
+     * @return string
+     */
+    public function getFrontendSectionTitle(): string
+    {
+        return $this->getConfig()->getFrontendLabel();
+    }
+
+    /**
      * Get tier image URL.
      *
      * @param \Ict\LoyaltyTier\Model\Tier $tier
@@ -220,5 +257,19 @@ class LoyaltyTier extends Template
         }
 
         return $this->priceCurrency;
+    }
+
+    /**
+     * Get loyalty configuration.
+     *
+     * @return Config
+     */
+    private function getConfig(): Config
+    {
+        if (!$this->config) {
+            $this->config = ObjectManager::getInstance()->get(Config::class);
+        }
+
+        return $this->config;
     }
 }

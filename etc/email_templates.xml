@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Email:etc/email_templates.xsd">
+    <template id="loyaltytier_email_achievement_template" label="Loyalty Tier Achievement" file="tier_achievement.html" type="html" module="Ict_LoyaltyTier" area="frontend"/>
+    <template id="loyaltytier_email_encouragement_template" label="Loyalty Tier Encouragement" file="tier_encouragement.html" type="html" module="Ict_LoyaltyTier" area="frontend"/>
+    <template id="ict_loyaltytier_achievement_email_template" label="Loyalty Tier Achievement" file="tier_achievement.html" type="html" module="Ict_LoyaltyTier" area="frontend"/>
+    <template id="ict_loyaltytier_encouragement_email_template" label="Loyalty Tier Encouragement" file="tier_encouragement.html" type="html" module="Ict_LoyaltyTier" area="frontend"/>
+</config>

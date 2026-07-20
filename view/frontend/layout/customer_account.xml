@@ -1,10 +1,9 @@
-<!-- File: app/code/Vendor/TireGrid/view/frontend/layout/customer_account.xml -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceBlock name="customer_account_navigation">
-            <block class="Magento\Framework\View\Element\Html\Link\Current" name="customer_account_navigation_tire_grid">
+            <block class="Ict\LoyaltyTier\Block\Account\LoyaltyLink" name="customer_account_navigation_tire_grid">
                 <arguments>
-                    <!-- <argument name="path" xsi:type="string">loyaltytier/index/tire</argument> -->
+                    <argument name="path" xsi:type="string">loyaltytier/account/index</argument>
                     <argument name="label" xsi:type="string">My Tires</argument>
                 </arguments>
             </block>

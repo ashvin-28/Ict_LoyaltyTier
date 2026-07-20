@@ -1,5 +1,9 @@
 <?php
 // phpcs:disable Squiz.ControlStructures.ControlSignature
+if (!$block->isEnabled()) {
+    return;
+}
+
 $tires = $block->getTireData();
 $spend = $block->getCustomerLifetimeSpend();
 
@@ -9,9 +13,6 @@ $hasTires = $tires && $tires->getSize();
 ?>
 <?php if ($hasTires): ?>
     <div class="block block-dashboard-loyalty">
-        <div class="block-title">
-            <strong><?= $escaper->escapeHtml(__('Loyalty Tier Details')) ?></strong>
-        </div>
         <div class="block-content">
             <div class="table-wrapper">
                 <table class="data table" id="tire-data-table">

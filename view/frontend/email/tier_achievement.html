@@ -1,0 +1,19 @@
+<!--@subject Congratulations, {{var customer_name}}! You reached {{var tier_name}} @-->
+<!--@vars {
+"var customer_name":"Customer Name",
+"var tier_name":"Tier Name",
+"var lifetime_spend":"Lifetime Spend"
+} @-->
+{{template config_path="design/email/header_template"}}
+
+<p>{{trans "Hi %customer_name," customer_name=$customer_name}}</p>
+<p>
+    {{trans
+        "Congratulations! You have reached the %tier_name loyalty tier with a lifetime spend of %lifetime_spend."
+        tier_name=$tier_name
+        lifetime_spend=$lifetime_spend
+    }}
+</p>
+<p>{{trans "Your tier benefits will be applied automatically on eligible checkout orders."}}</p>
+
+{{template config_path="design/email/footer_template"}}

@@ -1,0 +1,28 @@
+<!--@subject You are close to {{var next_tier_name}} @-->
+<!--@vars {
+"var customer_name":"Customer Name",
+"var next_tier_name":"Next Tier Name",
+"var next_tier_minimum_spend":"Next Tier Minimum Spend",
+"var lifetime_spend":"Lifetime Spend",
+"var spend_remaining":"Spend Remaining"
+} @-->
+{{template config_path="design/email/header_template"}}
+
+<p>{{trans "Hi %customer_name," customer_name=$customer_name}}</p>
+<p>
+    {{trans
+        "You are close to the %next_tier_name loyalty tier. Your lifetime spend is %lifetime_spend."
+        next_tier_name=$next_tier_name
+        lifetime_spend=$lifetime_spend
+    }}
+</p>
+<p>
+    {{trans
+        "Spend %spend_remaining more to reach %next_tier_name. The tier starts at %next_tier_minimum_spend."
+        spend_remaining=$spend_remaining
+        next_tier_name=$next_tier_name
+        next_tier_minimum_spend=$next_tier_minimum_spend
+    }}
+</p>
+
+{{template config_path="design/email/footer_template"}}

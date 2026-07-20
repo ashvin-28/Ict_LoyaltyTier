@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <loyaltytier>
+            <general>
+                <enabled>1</enabled>
+                <frontend_label>Loyalty Tier Details</frontend_label>
+            </general>
+            <email>
+                <enable_achievement_email>0</enable_achievement_email>
+                <achievement_sender>general</achievement_sender>
+                <achievement_template>loyaltytier_email_achievement_template</achievement_template>
+                <enable_encouragement_email>0</enable_encouragement_email>
+                <encouragement_sender>general</encouragement_sender>
+                <encouragement_template>loyaltytier_email_encouragement_template</encouragement_template>
+                <encouragement_threshold>90</encouragement_threshold>
+            </email>
+        </loyaltytier>
+    </default>
+</config>

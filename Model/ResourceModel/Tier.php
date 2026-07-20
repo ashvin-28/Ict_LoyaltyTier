@@ -62,6 +62,29 @@ class Tier extends AbstractDb
     }
 
     /**
+     * Get next tier above lifetime spend.
+     *
+     * @param float|int $lifetimeSpend
+     * @param bool $activeOnly
+     * @return \Ict\LoyaltyTier\Model\Tier
+     */
+    public function getNextTier($lifetimeSpend, bool $activeOnly = true)
+    {
+        $collection = $this->tierCollectionFactory->create();
+        if ($activeOnly) {
+            $collection->addFieldToFilter('status', 1);
+        }
+        $collection->addFieldToFilter('minimum_spend', ['gt' => $lifetimeSpend]);
+        $collection->setOrder('minimum_spend', 'ASC');
+        $collection->setPageSize(1);
+        $collection->load();
+        $items = $collection->getItems();
+        $item = reset($items);
+
+        return $item ?: $collection->getNewEmptyItem();
+    }
+
+    /**
      * Get tier by name.
      *
      * @param string $name

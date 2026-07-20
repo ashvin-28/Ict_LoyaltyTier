@@ -2,8 +2,10 @@
 
 namespace Ict\LoyaltyTier\Model\Total\Quote;
 
+use Ict\LoyaltyTier\Model\Config;
 use Ict\LoyaltyTier\Model\LoyaltyManager;
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Quote\Api\Data\ShippingAssignmentInterface;
@@ -31,18 +33,26 @@ class Custom extends AbstractTotal
     private $loyaltyManager;
 
     /**
+     * @var Config|null
+     */
+    private $config;
+
+    /**
      * @param PriceCurrencyInterface $priceCurrency
      * @param CustomerRepositoryInterface $customerRepository
      * @param LoyaltyManager $loyaltyManager
+     * @param Config|null $config
      */
     public function __construct(
         PriceCurrencyInterface $priceCurrency,
         CustomerRepositoryInterface $customerRepository,
-        LoyaltyManager $loyaltyManager
+        LoyaltyManager $loyaltyManager,
+        ?Config $config = null
     ) {
         $this->priceCurrency = $priceCurrency;
         $this->customerRepository = $customerRepository;
         $this->loyaltyManager = $loyaltyManager;
+        $this->config = $config;
     }
 
     /**
@@ -75,6 +85,10 @@ class Custom extends AbstractTotal
         }
 
         $this->resetQuoteLoyaltyData($quote);
+
+        if (!$this->getConfig()->isEnabled($quote->getStoreId())) {
+            return $this;
+        }
 
         $customerId = (int) $quote->getCustomerId();
         if ($customerId <= 0) {
@@ -208,6 +222,10 @@ class Custom extends AbstractTotal
      */
     private function getPersistedAppliedLoyaltyDiscountAmount(Quote $quote): float
     {
+        if (!$this->getConfig()->isEnabled($quote->getStoreId())) {
+            return 0.0;
+        }
+
         if ((int) $quote->getItemsCount() <= 0 || (int) $quote->getCustomerId() <= 0) {
             return 0.0;
         }
@@ -320,5 +338,19 @@ class Custom extends AbstractTotal
     private function formatPercent(float $percent): string
     {
         return rtrim(rtrim(sprintf('%.2F', $percent), '0'), '.');
+    }
+
+    /**
+     * Get loyalty configuration.
+     *
+     * @return Config
+     */
+    private function getConfig(): Config
+    {
+        if (!$this->config) {
+            $this->config = ObjectManager::getInstance()->get(Config::class);
+        }
+
+        return $this->config;
     }
 }
