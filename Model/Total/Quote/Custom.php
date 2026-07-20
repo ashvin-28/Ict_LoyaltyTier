@@ -166,7 +166,7 @@ class Custom extends AbstractTotal
      */
     public function getLabel()
     {
-        return __('Tire Discount');
+        return __('tier Discount');
     }
 
     /**
@@ -291,14 +291,14 @@ class Custom extends AbstractTotal
         $discountPercent = $this->getDiscountPercent($quote);
 
         if ($tierName !== '' && $discountPercent !== null) {
-            return __('Tire Discount (%1)(%2%)', $tierName, $this->formatPercent($discountPercent));
+            return __('tier Discount (%1)(%2%)', $tierName, $this->formatPercent($discountPercent));
         }
 
         if ($tierName !== '') {
-            return __('Tire Discount (%1)', $tierName);
+            return __('tier Discount (%1)', $tierName);
         }
 
-        return __('Tire Discount');
+        return __('tier Discount');
     }
 
     /**
