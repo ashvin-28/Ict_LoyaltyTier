@@ -285,6 +285,7 @@ class LoyaltyManager
         $previousTier = $this->getActiveTierById(
             (int) $this->getCustomerAttributeValue($customer, 'loyalty_tier_id')
         );
+        $tierChanged = $this->isTierChanged($previousTier, $tier);
 
         $customer->setCustomAttribute('lifetime_spend', $lifetimeSpend);
 
@@ -299,11 +300,11 @@ class LoyaltyManager
         $this->customerRepository->save($customer);
         $this->reindexCustomerGridRow($customerId);
 
-        if ($tier && $this->isTierUpgrade($previousTier, $tier)) {
+        if ($tier && $tierChanged) {
             $this->getEmailSender()->sendAchievementEmail($customer, $tier, $lifetimeSpend);
         }
 
-        $this->sendEncouragementEmailForCustomer($customer, $lifetimeSpend);
+        $this->sendEncouragementEmailForCustomer($customer, $lifetimeSpend, $tierChanged);
     }
 
     /**
@@ -332,37 +333,31 @@ class LoyaltyManager
      *
      * @param CustomerInterface $customer
      * @param float $lifetimeSpend
+     * @param bool $resetMarker
      * @return void
      */
-    private function sendEncouragementEmailForCustomer(CustomerInterface $customer, float $lifetimeSpend): void
-    {
+    private function sendEncouragementEmailForCustomer(
+        CustomerInterface $customer,
+        float $lifetimeSpend,
+        bool $resetMarker = false
+    ): void {
         $storeId = (int) $customer->getStoreId();
         if (!$this->getConfig()->isEncouragementEmailEnabled($storeId ?: null)) {
             return;
         }
 
+        $markerCleared = $resetMarker ? $this->clearEncouragementMarker($customer) : false;
+        if (!$markerCleared) {
+            $markerCleared = $this->normalizeEncouragementMarker($customer, $lifetimeSpend);
+        }
+
         $nextTier = $this->getNextActiveTier($lifetimeSpend);
-        if (!$nextTier || !$nextTier->getId()) {
+        if (!$this->canSendEncouragementEmail($customer, $nextTier, $lifetimeSpend, $storeId)) {
+            $this->saveCustomerWhenMarkerChanged($customer, $markerCleared);
             return;
         }
 
         $nextTierMinimumSpend = (float) $nextTier->getMinimumSpend();
-        if ($nextTierMinimumSpend <= 0.0001) {
-            return;
-        }
-
-        $thresholdAmount = $nextTierMinimumSpend
-            * ($this->getConfig()->getEncouragementThreshold($storeId ?: null) / 100);
-        if ($lifetimeSpend < $thresholdAmount) {
-            return;
-        }
-
-        if ((int) $this->getCustomerAttributeValue($customer, self::ENCOURAGEMENT_TIER_ATTRIBUTE)
-            === (int) $nextTier->getId()
-        ) {
-            return;
-        }
-
         $spendRemaining = max(0.0, $nextTierMinimumSpend - $lifetimeSpend);
         if (!$this->getEmailSender()->sendEncouragementEmail($customer, $nextTier, $lifetimeSpend, $spendRemaining)) {
             return;
@@ -380,27 +375,129 @@ class LoyaltyManager
     }
 
     /**
-     * Check whether new tier is an upgrade.
+     * Check whether customer can receive an encouragement email.
      *
-     * @param Tier|null $previousTier
-     * @param Tier $newTier
+     * @param CustomerInterface $customer
+     * @param Tier|null $nextTier
+     * @param float $lifetimeSpend
+     * @param int $storeId
      * @return bool
      */
-    private function isTierUpgrade(?Tier $previousTier, Tier $newTier): bool
-    {
-        if (!$newTier->getId()) {
+    private function canSendEncouragementEmail(
+        CustomerInterface $customer,
+        ?Tier $nextTier,
+        float $lifetimeSpend,
+        int $storeId
+    ): bool {
+        if (!$nextTier || !$nextTier->getId()) {
             return false;
         }
 
-        if (!$previousTier || !$previousTier->getId()) {
+        $nextTierMinimumSpend = (float) $nextTier->getMinimumSpend();
+        if ($nextTierMinimumSpend <= 0.0001) {
+            return false;
+        }
+
+        $thresholdAmount = $nextTierMinimumSpend
+            * ($this->getConfig()->getEncouragementThreshold($storeId ?: null) / 100);
+        if ($lifetimeSpend < $thresholdAmount) {
+            return false;
+        }
+
+        return (int) $this->getCustomerAttributeValue($customer, self::ENCOURAGEMENT_TIER_ATTRIBUTE)
+            !== (int) $nextTier->getId();
+    }
+
+    /**
+     * Reset stale encouragement marker when customer reaches or leaves that threshold band.
+     *
+     * @param CustomerInterface $customer
+     * @param float $lifetimeSpend
+     * @return bool
+     */
+    private function normalizeEncouragementMarker(CustomerInterface $customer, float $lifetimeSpend): bool
+    {
+        $markedTierId = (int) $this->getCustomerAttributeValue($customer, self::ENCOURAGEMENT_TIER_ATTRIBUTE);
+        if ($markedTierId <= 0) {
+            return false;
+        }
+
+        $markedTier = $this->getActiveTierById($markedTierId);
+        if (!$markedTier || !$markedTier->getId()) {
+            $customer->setCustomAttribute(self::ENCOURAGEMENT_TIER_ATTRIBUTE, null);
             return true;
         }
 
-        if ((int) $previousTier->getId() === (int) $newTier->getId()) {
+        $markedMinimumSpend = (float) $markedTier->getMinimumSpend();
+        if ($markedMinimumSpend <= 0.0001 || $lifetimeSpend >= $markedMinimumSpend) {
+            $customer->setCustomAttribute(self::ENCOURAGEMENT_TIER_ATTRIBUTE, null);
+            return true;
+        }
+
+        $storeId = (int) $customer->getStoreId();
+        $thresholdAmount = $markedMinimumSpend
+            * ($this->getConfig()->getEncouragementThreshold($storeId ?: null) / 100);
+        if ($lifetimeSpend < $thresholdAmount) {
+            $customer->setCustomAttribute(self::ENCOURAGEMENT_TIER_ATTRIBUTE, null);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Clear encouragement marker.
+     *
+     * @param CustomerInterface $customer
+     * @return bool
+     */
+    private function clearEncouragementMarker(CustomerInterface $customer): bool
+    {
+        if ((int) $this->getCustomerAttributeValue($customer, self::ENCOURAGEMENT_TIER_ATTRIBUTE) <= 0) {
             return false;
         }
 
-        return (float) $newTier->getMinimumSpend() > (float) $previousTier->getMinimumSpend();
+        $customer->setCustomAttribute(self::ENCOURAGEMENT_TIER_ATTRIBUTE, null);
+
+        return true;
+    }
+
+    /**
+     * Save customer when only the encouragement marker changed.
+     *
+     * @param CustomerInterface $customer
+     * @param bool $markerChanged
+     * @return void
+     */
+    private function saveCustomerWhenMarkerChanged(CustomerInterface $customer, bool $markerChanged): void
+    {
+        if (!$markerChanged) {
+            return;
+        }
+
+        try {
+            $this->customerRepository->save($customer);
+        } catch (\Throwable $exception) {
+            $this->getLogger()->error(
+                'Unable to save loyalty encouragement email marker.',
+                ['customer_id' => $customer->getId(), 'exception' => $exception]
+            );
+        }
+    }
+
+    /**
+     * Check whether assigned tier changed.
+     *
+     * @param Tier|null $previousTier
+     * @param Tier|null $newTier
+     * @return bool
+     */
+    private function isTierChanged(?Tier $previousTier, ?Tier $newTier): bool
+    {
+        $previousTierId = $previousTier && $previousTier->getId() ? (int) $previousTier->getId() : 0;
+        $newTierId = $newTier && $newTier->getId() ? (int) $newTier->getId() : 0;
+
+        return $previousTierId !== $newTierId;
     }
 
     /**
